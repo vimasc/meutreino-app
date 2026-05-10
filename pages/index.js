@@ -6,223 +6,297 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-const BACKEND_URL = "https://meutreino-ia-production.up.railway.app";
+const BACKEND = "https://meutreino-ia-production.up.railway.app";
 
-const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap');
+const css = `
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #0a0a0f;
-    --surface: #12121a;
-    --surface2: #1a1a26;
-    --border: #2a2a3d;
-    --accent: #00ff88;
-    --accent2: #7c3aed;
-    --text: #e8e8f0;
-    --text2: #8888a8;
-    --danger: #ff4466;
-    --run: #ff6b35;
+    --bg:       #080b0f;
+    --bg2:      #0e1218;
+    --card:     #111620;
+    --card2:    #161d2a;
+    --border:   rgba(255,255,255,0.07);
+    --border2:  rgba(255,255,255,0.12);
+    --accent:   #e8ff00;
+    --accent2:  #ff4d00;
+    --blue:     #00b4ff;
+    --text:     #f0f2f5;
+    --text2:    #6b7a8d;
+    --text3:    #3d4a5c;
+    --green:    #00e676;
+    --r: 12px;
   }
+
+  html, body { height: 100%; }
 
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'Syne', sans-serif;
+    font-family: 'Barlow', sans-serif;
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
   }
 
   .app {
-    max-width: 480px;
+    max-width: 430px;
     margin: 0 auto;
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
     position: relative;
+    z-index: 1;
+    padding-bottom: 80px;
   }
 
-  /* HEADER */
   .header {
-    padding: 20px 16px 12px;
+    padding: 20px 16px 16px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg);
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 50;
+    background: linear-gradient(180deg, var(--bg) 70%, transparent);
   }
-  .header-logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .header-dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 0 12px var(--accent);
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(0.8); }
-  }
-  .header-title {
-    font-size: 18px;
-    font-weight: 800;
+
+  .logo-main {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 26px;
     letter-spacing: -0.5px;
     color: var(--text);
+    text-transform: uppercase;
   }
-  .header-title span { color: var(--accent); }
-  .chat-global-btn {
-    background: var(--accent);
-    color: var(--bg);
-    border: none;
-    border-radius: 20px;
-    padding: 7px 14px;
-    font-family: 'Syne', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
+  .logo-main span { color: var(--accent); }
+
+  .live-pill {
     display: flex;
     align-items: center;
-    gap: 5px;
-  }
-  .chat-global-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,255,136,0.3); }
-
-  /* TABS */
-  .tabs {
-    display: flex;
-    padding: 12px 16px 0;
-    gap: 4px;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg);
-  }
-  .tab {
-    padding: 8px 16px;
-    border-radius: 8px 8px 0 0;
-    font-size: 13px;
+    gap: 6px;
+    background: rgba(232,255,0,0.08);
+    border: 1px solid rgba(232,255,0,0.2);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
     font-weight: 700;
-    cursor: pointer;
-    border: none;
-    background: transparent;
-    color: var(--text2);
-    transition: all 0.2s;
-    font-family: 'Syne', sans-serif;
-    letter-spacing: 0.3px;
-  }
-  .tab.active {
-    background: var(--surface);
+    letter-spacing: 1px;
     color: var(--accent);
-    border: 1px solid var(--border);
-    border-bottom: 1px solid var(--surface);
-    margin-bottom: -1px;
-  }
-
-  /* TREINOS */
-  .content {
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .loading-text {
-    text-align: center;
-    color: var(--text2);
-    font-family: 'Space Mono', monospace;
-    font-size: 13px;
-    padding: 40px 0;
-  }
-  .loading-text::after {
-    content: '...';
-    animation: dots 1.2s infinite;
-  }
-  @keyframes dots {
-    0% { content: '.'; }
-    33% { content: '..'; }
-    66% { content: '...'; }
-  }
-
-  .empty-state {
-    text-align: center;
-    color: var(--text2);
-    padding: 60px 20px;
-  }
-  .empty-icon { font-size: 48px; margin-bottom: 12px; }
-  .empty-text { font-size: 14px; line-height: 1.5; }
-
-  .treino-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 14px;
+    text-transform: uppercase;
     cursor: pointer;
     transition: all 0.2s;
-    position: relative;
-    overflow: hidden;
   }
-  .treino-card::before {
+  .live-pill:hover { background: rgba(232,255,0,0.15); }
+  .live-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    animation: livepulse 2s infinite;
+  }
+  @keyframes livepulse {
+    0%,100% { opacity:1; transform:scale(1); }
+    50% { opacity:0.4; transform:scale(0.7); }
+  }
+
+  .hero {
+    margin: 0 12px 16px;
+    background: var(--card);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+  }
+  .hero::before {
     content: '';
     position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 3px;
-    background: var(--run);
-    border-radius: 3px 0 0 3px;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
   }
-  .treino-card:hover {
-    border-color: var(--accent);
-    transform: translateX(2px);
-    box-shadow: -4px 0 0 var(--accent);
-  }
-
-  .treino-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 10px;
-  }
-  .treino-nome {
-    font-size: 15px;
-    font-weight: 800;
-    color: var(--text);
-    flex: 1;
-    padding-right: 8px;
-    line-height: 1.2;
-  }
-  .treino-data {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    color: var(--text2);
-    white-space: nowrap;
-  }
-
-  .treino-stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-    margin-bottom: 10px;
-  }
-  .stat {
-    background: var(--surface2);
-    border-radius: 8px;
-    padding: 8px 6px;
-    text-align: center;
-  }
-  .stat-val {
-    font-family: 'Space Mono', monospace;
-    font-size: 16px;
+  .hero-label {
+    padding: 14px 16px 0;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
     font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--text2);
+    text-transform: uppercase;
+  }
+  .hero-name {
+    padding: 4px 16px 12px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--text);
+    letter-spacing: -0.3px;
+    line-height: 1.1;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid var(--border);
+  }
+  .hero-stat {
+    padding: 12px 8px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+  }
+  .hero-stat:last-child { border-right: none; }
+  .hero-stat-val {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
     color: var(--accent);
     display: block;
+    line-height: 1;
   }
-  .stat-label {
+  .hero-stat-lbl {
+    font-size: 10px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-top: 3px;
+    display: block;
+  }
+
+  .section-title {
+    padding: 4px 16px 10px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--text2);
+    text-transform: uppercase;
+  }
+
+  .treinos-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0 12px;
+  }
+
+  .treino-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .treino-card.open {
+    border-color: var(--border2);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  .treino-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .treino-row:hover { background: rgba(255,255,255,0.02); }
+
+  .treino-icon {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: rgba(232,255,0,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .treino-info { flex: 1; min-width: 0; }
+  .treino-nome {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0.1px;
+  }
+  .treino-meta {
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 1px;
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 0.5px;
+  }
+
+  .treino-badges {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+    flex-shrink: 0;
+  }
+  .badge-pace {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .badge-dist {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    color: var(--text2);
+    letter-spacing: 0.3px;
+  }
+  .chevron {
+    color: var(--text3);
+    font-size: 14px;
+    transition: transform 0.25s;
+    margin-left: 4px;
+    flex-shrink: 0;
+  }
+  .treino-card.open .chevron { transform: rotate(180deg); color: var(--accent); }
+
+  .treino-panel {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1);
+  }
+  .treino-card.open .treino-panel {
+    max-height: 3000px;
+    border-top: 1px solid var(--border);
+  }
+
+  .stats-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-bottom: 1px solid var(--border);
+  }
+  .sstat {
+    padding: 10px 8px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+  }
+  .sstat:last-child { border-right: none; }
+  .sstat-val {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--blue);
+    display: block;
+  }
+  .sstat-lbl {
     font-size: 9px;
     color: var(--text2);
     text-transform: uppercase;
@@ -231,560 +305,652 @@ const styles = `
     display: block;
   }
 
-  .treino-actions {
-    display: flex;
-    gap: 8px;
-  }
-  .btn-analise {
-    flex: 1;
-    padding: 8px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--text2);
-    font-family: 'Syne', sans-serif;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .btn-analise:hover { border-color: var(--text2); color: var(--text); }
-  .btn-chat-treino {
-    flex: 1;
-    padding: 8px;
-    border-radius: 8px;
-    border: 1px solid var(--accent2);
-    background: rgba(124,58,237,0.1);
-    color: var(--accent2);
-    font-family: 'Syne', sans-serif;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .btn-chat-treino:hover {
-    background: rgba(124,58,237,0.2);
-    color: #a78bfa;
-  }
-
-  /* MODAL DE ANÁLISE */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    z-index: 200;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    padding: 0;
-    animation: fadeIn 0.2s;
-  }
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-  .modal {
-    background: var(--surface);
-    border-radius: 20px 20px 0 0;
-    width: 100%;
-    max-width: 480px;
-    max-height: 85vh;
-    display: flex;
-    flex-direction: column;
-    animation: slideUp 0.3s ease;
-  }
-  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-  .modal-header {
-    padding: 16px 16px 12px;
+  .analise-block {
+    padding: 14px;
     border-bottom: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
   }
-  .modal-title {
-    font-size: 16px;
-    font-weight: 800;
-    color: var(--text);
-  }
-  .modal-close {
-    width: 32px; height: 32px;
-    border-radius: 50%;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--text2);
-    font-size: 18px;
-    cursor: pointer;
+  .analise-header {
     display: flex;
     align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
+    gap: 6px;
+    margin-bottom: 10px;
   }
-  .modal-close:hover { border-color: var(--danger); color: var(--danger); }
-  .modal-body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px;
+  .analise-tag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--accent2);
+    text-transform: uppercase;
   }
+  .analise-line { flex: 1; height: 1px; background: var(--border); }
   .analise-text {
-    font-size: 14px;
-    line-height: 1.7;
-    color: var(--text);
+    font-size: 13px;
+    line-height: 1.65;
+    color: #9aa5b4;
     white-space: pre-wrap;
-    font-family: 'Space Mono', monospace;
   }
-
-  /* CHAT */
-  .chat-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    height: calc(100vh - 130px);
-  }
-  .chat-context-banner {
-    margin: 10px 16px 0;
-    padding: 8px 12px;
-    background: rgba(124,58,237,0.15);
-    border: 1px solid rgba(124,58,237,0.3);
-    border-radius: 10px;
-    font-size: 11px;
-    color: #a78bfa;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-weight: 600;
-  }
-  .chat-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 12px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  .chat-empty {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    color: var(--text2);
-    padding: 30px;
-  }
-  .chat-empty-icon { font-size: 44px; }
-  .chat-empty-text { font-size: 13px; text-align: center; line-height: 1.5; }
-  .chat-suggestions {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    width: 100%;
-    margin-top: 4px;
-  }
-  .suggestion-btn {
-    padding: 9px 12px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: var(--surface2);
-    color: var(--text);
-    font-family: 'Syne', sans-serif;
+  .analise-toggle {
+    margin-top: 8px;
     font-size: 12px;
-    font-weight: 600;
+    color: var(--accent);
     cursor: pointer;
-    text-align: left;
-    transition: all 0.15s;
+    font-weight: 600;
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: 'Barlow', sans-serif;
   }
-  .suggestion-btn:hover { border-color: var(--accent); color: var(--accent); }
 
-  .msg {
+  .chat-block { padding: 12px 14px 14px; }
+  .chat-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .chat-tag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--blue);
+    text-transform: uppercase;
+  }
+
+  .chat-msgs {
     display: flex;
     flex-direction: column;
-    max-width: 82%;
+    gap: 8px;
+    margin-bottom: 10px;
+    max-height: 320px;
+    overflow-y: auto;
   }
-  .msg.user { align-self: flex-end; align-items: flex-end; }
-  .msg.assistant { align-self: flex-start; align-items: flex-start; }
+  .chat-msgs::-webkit-scrollbar { width: 3px; }
+  .chat-msgs::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
 
-  .msg-bubble {
-    padding: 10px 14px;
-    border-radius: 16px;
-    font-size: 14px;
-    line-height: 1.6;
+  .cmsg { display: flex; flex-direction: column; }
+  .cmsg.user { align-items: flex-end; }
+  .cmsg.assistant { align-items: flex-start; }
+  .cmsg-bubble {
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    max-width: 88%;
     white-space: pre-wrap;
   }
-  .msg.user .msg-bubble {
+  .cmsg.user .cmsg-bubble {
     background: var(--accent);
-    color: var(--bg);
-    border-radius: 16px 16px 4px 16px;
+    color: #000;
     font-weight: 600;
+    border-radius: 12px 12px 3px 12px;
   }
-  .msg.assistant .msg-bubble {
-    background: var(--surface2);
-    border: 1px solid var(--border);
+  .cmsg.assistant .cmsg-bubble {
+    background: var(--card2);
+    border: 1px solid var(--border2);
     color: var(--text);
-    border-radius: 4px 16px 16px 16px;
-  }
-  .msg-time {
-    font-family: 'Space Mono', monospace;
-    font-size: 9px;
-    color: var(--text2);
-    margin-top: 3px;
-    padding: 0 4px;
+    border-radius: 3px 12px 12px 12px;
   }
 
-  .typing-bubble {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 4px 16px 16px 16px;
-    padding: 12px 16px;
+  .typing {
     display: flex;
-    gap: 5px;
-    align-items: center;
-    align-self: flex-start;
+    gap: 4px;
+    padding: 10px 12px;
+    background: var(--card2);
+    border: 1px solid var(--border2);
+    border-radius: 3px 12px 12px 12px;
+    width: fit-content;
   }
-  .typing-dot {
-    width: 7px; height: 7px;
+  .tdot {
+    width: 6px; height: 6px;
     border-radius: 50%;
     background: var(--text2);
-    animation: typing 1.2s infinite;
+    animation: tdots 1.1s infinite;
   }
-  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes typing {
-    0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
-    40% { transform: translateY(-6px); opacity: 1; }
+  .tdot:nth-child(2) { animation-delay: 0.18s; }
+  .tdot:nth-child(3) { animation-delay: 0.36s; }
+  @keyframes tdots {
+    0%,80%,100% { transform:translateY(0); opacity:0.3; }
+    40% { transform:translateY(-5px); opacity:1; }
   }
 
-  .chat-input-area {
-    padding: 10px 12px 16px;
-    border-top: 1px solid var(--border);
+  .quick-qs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .qq {
+    padding: 5px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--text2);
+    font-size: 11px;
+    font-family: 'Barlow', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .qq:hover { border-color: var(--accent); color: var(--accent); background: rgba(232,255,0,0.05); }
+
+  .chat-input-row {
     display: flex;
     gap: 8px;
     align-items: flex-end;
-    background: var(--bg);
   }
   .chat-input {
     flex: 1;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 10px 14px;
+    background: var(--card2);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 9px 12px;
     color: var(--text);
-    font-family: 'Syne', sans-serif;
-    font-size: 14px;
+    font-family: 'Barlow', sans-serif;
+    font-size: 13px;
     resize: none;
     outline: none;
-    max-height: 100px;
-    min-height: 44px;
+    min-height: 38px;
+    max-height: 90px;
     transition: border-color 0.2s;
     line-height: 1.4;
   }
-  .chat-input:focus { border-color: var(--accent); }
-  .chat-input::placeholder { color: var(--text2); }
+  .chat-input:focus { border-color: rgba(232,255,0,0.4); }
+  .chat-input::placeholder { color: var(--text3); }
   .send-btn {
-    width: 44px; height: 44px;
-    border-radius: 12px;
+    width: 38px; height: 38px;
+    border-radius: 10px;
     background: var(--accent);
     border: none;
+    color: #000;
+    font-size: 16px;
+    font-weight: 900;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    transition: all 0.2s;
-    font-size: 18px;
+    transition: all 0.15s;
   }
-  .send-btn:hover { transform: scale(1.05); box-shadow: 0 4px 16px rgba(0,255,136,0.3); }
-  .send-btn:disabled { background: var(--border); cursor: not-allowed; transform: none; box-shadow: none; }
+  .send-btn:hover { transform: scale(1.06); box-shadow: 0 4px 14px rgba(232,255,0,0.3); }
+  .send-btn:disabled { background: var(--card2); color: var(--text3); cursor: not-allowed; transform: none; box-shadow: none; }
 
-  /* SCROLLBAR */
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .fab {
+    position: fixed;
+    bottom: 24px;
+    right: calc(50% - 215px + 12px);
+    width: 52px; height: 52px;
+    border-radius: 16px;
+    background: var(--accent);
+    border: none;
+    color: #000;
+    font-size: 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 24px rgba(232,255,0,0.35);
+    z-index: 100;
+    transition: all 0.2s;
+  }
+  .fab:hover { transform: scale(1.08); }
+
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 200;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    animation: fadein 0.2s;
+  }
+  @keyframes fadein { from{opacity:0} to{opacity:1} }
+
+  .gchat-modal {
+    width: 100%;
+    max-width: 430px;
+    height: 80vh;
+    background: var(--bg2);
+    border-radius: 20px 20px 0 0;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border2);
+    border-bottom: none;
+    animation: slideup 0.3s cubic-bezier(0.4,0,0.2,1);
+  }
+  @keyframes slideup { from{transform:translateY(100%)} to{transform:translateY(0)} }
+
+  .gchat-header {
+    padding: 16px 16px 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .gchat-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text);
+  }
+  .gchat-title span { color: var(--accent); }
+  .close-btn {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--text2);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .close-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  .gchat-msgs {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .gchat-msgs::-webkit-scrollbar { width: 3px; }
+  .gchat-msgs::-webkit-scrollbar-thumb { background: var(--border2); }
+
+  .gchat-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: var(--text2);
+    padding: 20px;
+  }
+  .gchat-empty-icon { font-size: 40px; }
+  .gchat-empty-text { font-size: 13px; text-align: center; line-height: 1.5; }
+  .gchat-suggestions { display: flex; flex-direction: column; gap: 6px; width: 100%; margin-top: 4px; }
+  .gs-btn {
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border2);
+    background: var(--card);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s;
+  }
+  .gs-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(232,255,0,0.04); }
+
+  .gchat-input-area {
+    padding: 10px 12px 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+  }
+
+  .loading-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 0;
+    gap: 14px;
+  }
+  .loading-bar {
+    width: 120px; height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .loading-bar::after {
+    content: '';
+    display: block;
+    height: 100%;
+    width: 40%;
+    background: var(--accent);
+    border-radius: 2px;
+    animation: loadslide 1.2s ease-in-out infinite;
+  }
+  @keyframes loadslide {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(350%); }
+  }
+  .loading-lbl {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--text2);
+    text-transform: uppercase;
+  }
 `;
 
-function formatDate(dateStr) {
-  if (!dateStr) return "";
-  const d = new Date(dateStr);
-  return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
-}
-
-function formatTime(dateStr) {
-  if (!dateStr) return "";
-  const d = new Date(dateStr);
-  return d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-}
-
-const SUGGESTIONS_GLOBAL = [
+const GLOBAL_QS = [
   "📊 Como está minha evolução de pace?",
   "💪 Qual foi meu melhor treino recente?",
-  "🎯 O que devo focar para melhorar velocidade?",
+  "🎯 O que focar para ganhar velocidade?",
   "😴 Estou me recuperando bem?",
 ];
+
+const TREINO_QS = [
+  "Como foi minha intensidade?",
+  "O que melhorar no próximo?",
+  "Analise minha cadência",
+];
+
+function fmt(d) {
+  if (!d) return "";
+  return new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+}
+
+function ChatBlock({ treino }) {
+  const [msgs, setMsgs] = useState([]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const endRef = useRef(null);
+
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [msgs, loading]);
+
+  async function send(text) {
+    const msg = text || input.trim();
+    if (!msg || loading) return;
+    setInput("");
+    setMsgs(p => [...p, { role: "user", content: msg }]);
+    setLoading(true);
+    try {
+      const r = await fetch(`${BACKEND}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg, activity_id: treino?.activity_id || null }),
+      });
+      const d = await r.json();
+      setMsgs(p => [...p, { role: "assistant", content: d.response || "Sem resposta." }]);
+    } catch {
+      setMsgs(p => [...p, { role: "assistant", content: "⚠️ Erro ao conectar. Tente novamente." }]);
+    }
+    setLoading(false);
+  }
+
+  return (
+    <div className="chat-block">
+      <div className="chat-header">
+        <span className="chat-tag">💬 Coach IA</span>
+        <div className="analise-line" />
+      </div>
+      {msgs.length === 0 && !loading && (
+        <div className="quick-qs">
+          {TREINO_QS.map(q => (
+            <button key={q} className="qq" onClick={() => send(q)}>{q}</button>
+          ))}
+        </div>
+      )}
+      {(msgs.length > 0 || loading) && (
+        <div className="chat-msgs">
+          {msgs.map((m, i) => (
+            <div key={i} className={`cmsg ${m.role}`}>
+              <div className="cmsg-bubble">{m.content}</div>
+            </div>
+          ))}
+          {loading && (
+            <div className="typing">
+              <div className="tdot" /><div className="tdot" /><div className="tdot" />
+            </div>
+          )}
+          <div ref={endRef} />
+        </div>
+      )}
+      <div className="chat-input-row">
+        <textarea
+          className="chat-input"
+          placeholder="Pergunte sobre este treino..."
+          value={input}
+          rows={1}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
+        />
+        <button className="send-btn" onClick={() => send()} disabled={!input.trim() || loading}>↑</button>
+      </div>
+    </div>
+  );
+}
+
+function GlobalChat({ onClose }) {
+  const [msgs, setMsgs] = useState([]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const endRef = useRef(null);
+
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [msgs, loading]);
+
+  async function send(text) {
+    const msg = text || input.trim();
+    if (!msg || loading) return;
+    setInput("");
+    setMsgs(p => [...p, { role: "user", content: msg }]);
+    setLoading(true);
+    try {
+      const r = await fetch(`${BACKEND}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg }),
+      });
+      const d = await r.json();
+      setMsgs(p => [...p, { role: "assistant", content: d.response || "Sem resposta." }]);
+    } catch {
+      setMsgs(p => [...p, { role: "assistant", content: "⚠️ Erro ao conectar. Tente novamente." }]);
+    }
+    setLoading(false);
+  }
+
+  return (
+    <div className="overlay" onClick={onClose}>
+      <div className="gchat-modal" onClick={e => e.stopPropagation()}>
+        <div className="gchat-header">
+          <div className="gchat-title">Coach <span>IA</span></div>
+          <button className="close-btn" onClick={onClose}>×</button>
+        </div>
+        {msgs.length === 0 && !loading ? (
+          <div className="gchat-empty">
+            <div className="gchat-empty-icon">🤖</div>
+            <div className="gchat-empty-text">Pergunte qualquer coisa sobre seus treinos e evolução</div>
+            <div className="gchat-suggestions">
+              {GLOBAL_QS.map(q => (
+                <button key={q} className="gs-btn" onClick={() => send(q)}>{q}</button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="gchat-msgs">
+            {msgs.map((m, i) => (
+              <div key={i} className={`cmsg ${m.role}`}>
+                <div className="cmsg-bubble">{m.content}</div>
+              </div>
+            ))}
+            {loading && (
+              <div className="typing">
+                <div className="tdot" /><div className="tdot" /><div className="tdot" />
+              </div>
+            )}
+            <div ref={endRef} />
+          </div>
+        )}
+        <div className="gchat-input-area">
+          <textarea
+            className="chat-input"
+            placeholder="Pergunte ao seu coach..."
+            value={input}
+            rows={1}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
+            autoFocus
+          />
+          <button className="send-btn" onClick={() => send()} disabled={!input.trim() || loading}>↑</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TreinoCard({ treino, defaultOpen }) {
+  const [open, setOpen] = useState(defaultOpen || false);
+  const [showFull, setShowFull] = useState(false);
+  const analise = treino.analysis || "";
+  const analiseShort = analise.slice(0, 400);
+  const hasMore = analise.length > 400;
+
+  return (
+    <div className={`treino-card ${open ? "open" : ""}`}>
+      <div className="treino-row" onClick={() => setOpen(o => !o)}>
+        <div className="treino-icon">🏃</div>
+        <div className="treino-info">
+          <div className="treino-nome">{treino.activity_name || "Treino"}</div>
+          <div className="treino-meta">{fmt(treino.created_at)} · {treino.duration_min ? `${Math.round(treino.duration_min)} min` : "—"}</div>
+        </div>
+        <div className="treino-badges">
+          <span className="badge-pace">{treino.pace || "—"}</span>
+          <span className="badge-dist">{treino.distance_km ? `${treino.distance_km} km` : "—"}</span>
+        </div>
+        <span className="chevron">▼</span>
+      </div>
+
+      <div className="treino-panel">
+        <div className="stats-strip">
+          <div className="sstat">
+            <span className="sstat-val">{treino.distance_km ?? "—"}</span>
+            <span className="sstat-lbl">km</span>
+          </div>
+          <div className="sstat">
+            <span className="sstat-val">{treino.heart_rate_avg ? Math.round(treino.heart_rate_avg) : "—"}</span>
+            <span className="sstat-lbl">bpm</span>
+          </div>
+          <div className="sstat">
+            <span className="sstat-val">{treino.duration_min ? Math.round(treino.duration_min) : "—"}</span>
+            <span className="sstat-lbl">min</span>
+          </div>
+        </div>
+
+        {analise && (
+          <div className="analise-block">
+            <div className="analise-header">
+              <span className="analise-tag">⚡ Análise IA</span>
+              <div className="analise-line" />
+            </div>
+            <div className="analise-text">
+              {showFull ? analise : analiseShort}
+              {hasMore && !showFull && "..."}
+            </div>
+            {hasMore && (
+              <button className="analise-toggle" onClick={e => { e.stopPropagation(); setShowFull(v => !v); }}>
+                {showFull ? "← Ver menos" : "Ver análise completa →"}
+              </button>
+            )}
+          </div>
+        )}
+
+        <ChatBlock treino={treino} />
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
   const [treinos, setTreinos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("treinos");
-  const [modalAnalise, setModalAnalise] = useState(null);
-  const [chatMessages, setChatMessages] = useState([]);
-  const [chatInput, setChatInput] = useState("");
-  const [chatLoading, setChatLoading] = useState(false);
-  const [chatContext, setChatContext] = useState(null); // { id, name }
-  const messagesEndRef = useRef(null);
-  const inputRef = useRef(null);
+  const [gchat, setGchat] = useState(false);
 
   useEffect(() => {
-    loadTreinos();
+    (async () => {
+      const { data } = await supabase
+        .from("analyses")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(30);
+      setTreinos(data || []);
+      setLoading(false);
+    })();
   }, []);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chatMessages, chatLoading]);
-
-  async function loadTreinos() {
-    setLoading(true);
-    const { data } = await supabase
-      .from("analyses")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(30);
-    setTreinos(data || []);
-    setLoading(false);
-  }
-
-  function openChat(context = null) {
-    setChatContext(context);
-    setChatMessages([]);
-    setActiveTab("chat");
-    setTimeout(() => inputRef.current?.focus(), 100);
-  }
-
-  async function sendMessage(text) {
-    const msg = text || chatInput.trim();
-    if (!msg || chatLoading) return;
-    setChatInput("");
-
-    const userMsg = { role: "user", content: msg, time: new Date() };
-    setChatMessages((prev) => [...prev, userMsg]);
-    setChatLoading(true);
-
-    try {
-      const res = await fetch(`${BACKEND_URL}/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: msg,
-          activity_id: chatContext?.id || null,
-        }),
-      });
-      const data = await res.json();
-      const aiMsg = {
-        role: "assistant",
-        content: data.response || "Sem resposta do coach.",
-        time: new Date(),
-      };
-      setChatMessages((prev) => [...prev, aiMsg]);
-    } catch (e) {
-      setChatMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: "⚠️ Erro ao conectar com o coach. Tente novamente.",
-          time: new Date(),
-        },
-      ]);
-    }
-    setChatLoading(false);
-  }
-
-  function handleKeyDown(e) {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  }
+  const ultimo = treinos[0];
 
   return (
     <>
-      <style>{styles}</style>
+      <style>{css}</style>
       <div className="app">
-        {/* HEADER */}
         <header className="header">
-          <div className="header-logo">
-            <div className="header-dot" />
-            <span className="header-title">
-              Meu<span>Treino</span>IA
-            </span>
+          <span className="logo-main">Meu<span>Treino</span>IA</span>
+          <div className="live-pill" onClick={() => setGchat(true)}>
+            <div className="live-dot" />
+            Coach
           </div>
-          <button className="chat-global-btn" onClick={() => openChat(null)}>
-            🤖 Coach
-          </button>
         </header>
 
-        {/* TABS */}
-        <div className="tabs">
-          <button
-            className={`tab ${activeTab === "treinos" ? "active" : ""}`}
-            onClick={() => setActiveTab("treinos")}
-          >
-            🏃 Treinos
-          </button>
-          <button
-            className={`tab ${activeTab === "chat" ? "active" : ""}`}
-            onClick={() => setActiveTab("chat")}
-          >
-            💬 Chat
-          </button>
-        </div>
-
-        {/* TREINOS */}
-        {activeTab === "treinos" && (
-          <div className="content">
-            {loading ? (
-              <div className="loading-text">Carregando treinos</div>
-            ) : treinos.length === 0 ? (
-              <div className="empty-state">
-                <div className="empty-icon">🏃</div>
-                <div className="empty-text">
-                  Nenhum treino ainda.<br />
-                  Complete uma corrida no Strava para ver a análise aqui!
-                </div>
-              </div>
-            ) : (
-              treinos.map((t) => (
-                <div className="treino-card" key={t.id}>
-                  <div className="treino-header">
-                    <div className="treino-nome">{t.activity_name || "Treino"}</div>
-                    <div className="treino-data">{formatDate(t.created_at)}</div>
-                  </div>
-                  <div className="treino-stats">
-                    <div className="stat">
-                      <span className="stat-val">{t.distance_km ? `${t.distance_km}` : "—"}</span>
-                      <span className="stat-label">km</span>
-                    </div>
-                    <div className="stat">
-                      <span className="stat-val">{t.pace || "—"}</span>
-                      <span className="stat-label">min/km</span>
-                    </div>
-                    <div className="stat">
-                      <span className="stat-val">
-                        {t.heart_rate_avg ? Math.round(t.heart_rate_avg) : "—"}
-                      </span>
-                      <span className="stat-label">bpm</span>
-                    </div>
-                  </div>
-                  <div className="treino-actions">
-                    <button
-                      className="btn-analise"
-                      onClick={() => setModalAnalise(t)}
-                    >
-                      📋 Ver análise
-                    </button>
-                    <button
-                      className="btn-chat-treino"
-                      onClick={() =>
-                        openChat({ id: t.activity_id, name: t.activity_name })
-                      }
-                    >
-                      💬 Perguntar ao coach
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
+        {loading ? (
+          <div className="loading-wrap">
+            <div className="loading-bar" />
+            <span className="loading-lbl">Carregando treinos</span>
           </div>
-        )}
-
-        {/* CHAT */}
-        {activeTab === "chat" && (
-          <div className="chat-container">
-            {chatContext && (
-              <div className="chat-context-banner">
-                🎯 Contexto: {chatContext.name}
-              </div>
+        ) : (
+          <>
+            {ultimo && (
+              <>
+                <div className="section-title">Último treino</div>
+                <div className="hero">
+                  <div className="hero-label">🏃 {ultimo.activity_type || "Run"} · {fmt(ultimo.created_at)}</div>
+                  <div className="hero-name">{ultimo.activity_name || "Treino"}</div>
+                  <div className="hero-grid">
+                    <div className="hero-stat">
+                      <span className="hero-stat-val">{ultimo.distance_km ?? "—"}</span>
+                      <span className="hero-stat-lbl">km</span>
+                    </div>
+                    <div className="hero-stat">
+                      <span className="hero-stat-val">{ultimo.pace || "—"}</span>
+                      <span className="hero-stat-lbl">min/km</span>
+                    </div>
+                    <div className="hero-stat">
+                      <span className="hero-stat-val">{ultimo.heart_rate_avg ? Math.round(ultimo.heart_rate_avg) : "—"}</span>
+                      <span className="hero-stat-lbl">bpm</span>
+                    </div>
+                    <div className="hero-stat">
+                      <span className="hero-stat-val">{ultimo.duration_min ? Math.round(ultimo.duration_min) : "—"}</span>
+                      <span className="hero-stat-lbl">min</span>
+                    </div>
+                  </div>
+                </div>
+              </>
             )}
-            <div className="chat-messages">
-              {chatMessages.length === 0 && !chatLoading ? (
-                <div className="chat-empty">
-                  <div className="chat-empty-icon">🤖</div>
-                  <div className="chat-empty-text">
-                    {chatContext
-                      ? `Tire dúvidas sobre "${chatContext.name}"`
-                      : "Pergunte qualquer coisa sobre seus treinos"}
-                  </div>
-                  <div className="chat-suggestions">
-                    {SUGGESTIONS_GLOBAL.map((s) => (
-                      <button
-                        key={s}
-                        className="suggestion-btn"
-                        onClick={() => sendMessage(s)}
-                      >
-                        {s}
-                      </button>
-                    ))}
-                  </div>
+
+            <div className="section-title" style={{ marginTop: 16 }}>Histórico</div>
+            <div className="treinos-list">
+              {treinos.length === 0 ? (
+                <div style={{ textAlign: "center", color: "var(--text2)", padding: "40px 0", fontSize: 14 }}>
+                  Nenhum treino ainda. Complete uma corrida no Strava!
                 </div>
               ) : (
-                <>
-                  {chatMessages.map((m, i) => (
-                    <div key={i} className={`msg ${m.role}`}>
-                      <div className="msg-bubble">{m.content}</div>
-                      <div className="msg-time">{formatTime(m.time)}</div>
-                    </div>
-                  ))}
-                  {chatLoading && (
-                    <div className="typing-bubble">
-                      <div className="typing-dot" />
-                      <div className="typing-dot" />
-                      <div className="typing-dot" />
-                    </div>
-                  )}
-                </>
+                treinos.map((t, i) => (
+                  <TreinoCard key={t.id} treino={t} defaultOpen={i === 0} />
+                ))
               )}
-              <div ref={messagesEndRef} />
             </div>
-            <div className="chat-input-area">
-              <textarea
-                ref={inputRef}
-                className="chat-input"
-                placeholder="Pergunte ao seu coach..."
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                rows={1}
-              />
-              <button
-                className="send-btn"
-                onClick={() => sendMessage()}
-                disabled={!chatInput.trim() || chatLoading}
-              >
-                ↑
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* MODAL ANÁLISE */}
-        {modalAnalise && (
-          <div className="modal-overlay" onClick={() => setModalAnalise(null)}>
-            <div className="modal" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-header">
-                <div className="modal-title">
-                  {modalAnalise.activity_name || "Análise do Treino"}
-                </div>
-                <button
-                  className="modal-close"
-                  onClick={() => setModalAnalise(null)}
-                >
-                  ×
-                </button>
-              </div>
-              <div className="modal-body">
-                <div className="analise-text">
-                  {modalAnalise.analysis || "Análise não disponível."}
-                </div>
-              </div>
-            </div>
-          </div>
+          </>
         )}
       </div>
+
+      <button className="fab" onClick={() => setGchat(true)} title="Coach IA">🤖</button>
+      {gchat && <GlobalChat onClose={() => setGchat(false)} />}
     </>
   );
 }
