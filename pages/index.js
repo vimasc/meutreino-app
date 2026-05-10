@@ -925,12 +925,106 @@ function TreinoCard({ treino, defaultOpen }) {
   );
 }
 
+const APP_PASSWORD = process.env.NEXT_PUBLIC_APP_PASSWORD || "IAMeuTreinoVini2026";
+
+const loginCss = `
+  .login-screen {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 24px;
+    background: var(--bg);
+  }
+  .login-logo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 36px;
+    color: var(--text);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .login-logo span { color: var(--accent); }
+  .login-sub {
+    font-size: 13px;
+    color: var(--text2);
+    margin-bottom: 40px;
+    font-family: 'Barlow', sans-serif;
+  }
+  .login-box {
+    width: 100%;
+    max-width: 320px;
+    background: var(--card);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    padding: 28px 24px;
+  }
+  .login-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--text2);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: block;
+  }
+  .login-input {
+    width: 100%;
+    background: var(--card2);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 15px;
+    outline: none;
+    margin-bottom: 16px;
+    transition: border-color 0.2s;
+    letter-spacing: 2px;
+  }
+  .login-input:focus { border-color: rgba(232,255,0,0.4); }
+  .login-btn {
+    width: 100%;
+    padding: 13px;
+    border-radius: 12px;
+    background: var(--accent);
+    border: none;
+    color: #000;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .login-btn:hover { transform: scale(1.02); box-shadow: 0 4px 20px rgba(232,255,0,0.3); }
+  .login-error {
+    margin-top: 12px;
+    text-align: center;
+    font-size: 13px;
+    color: #ff4466;
+    font-family: 'Barlow', sans-serif;
+  }
+`;
+
 export default function Home() {
+  const [auth, setAuth] = useState(false);
+  const [pwInput, setPwInput] = useState("");
+  const [pwError, setPwError] = useState(false);
   const [treinos, setTreinos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [gchat, setGchat] = useState(false);
 
   useEffect(() => {
+    if (typeof window !== "undefined" && sessionStorage.getItem("mti_auth") === "1") {
+      setAuth(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!auth) return;
     (async () => {
       const { data } = await supabase
         .from("analyses")
@@ -940,7 +1034,45 @@ export default function Home() {
       setTreinos(data || []);
       setLoading(false);
     })();
-  }, []);
+  }, [auth]);
+
+  function handleLogin() {
+    if (pwInput === APP_PASSWORD) {
+      sessionStorage.setItem("mti_auth", "1");
+      setAuth(true);
+      setPwError(false);
+    } else {
+      setPwError(true);
+      setPwInput("");
+    }
+  }
+
+  if (!auth) {
+    return (
+      <>
+        <style>{css}</style>
+        <style>{loginCss}</style>
+        <div className="login-screen">
+          <div className="login-logo">Meu<span>Treino</span>IA</div>
+          <div className="login-sub">Acesso restrito</div>
+          <div className="login-box">
+            <span className="login-label">🔑 Senha</span>
+            <input
+              className="login-input"
+              type="password"
+              placeholder="••••••••••••"
+              value={pwInput}
+              onChange={e => { setPwInput(e.target.value); setPwError(false); }}
+              onKeyDown={e => e.key === "Enter" && handleLogin()}
+              autoFocus
+            />
+            <button className="login-btn" onClick={handleLogin}>ENTRAR</button>
+            {pwError && <div className="login-error">Senha incorreta. Tente novamente.</div>}
+          </div>
+        </div>
+      </>
+    );
+  }
 
   const ultimo = treinos[0];
 
