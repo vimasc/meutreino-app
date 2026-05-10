@@ -328,8 +328,28 @@ const css = `
     font-size: 13px;
     line-height: 1.65;
     color: #9aa5b4;
-    white-space: pre-wrap;
   }
+  .analise-text p { margin-bottom: 8px; }
+  .analise-text h3 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 12px 0 4px;
+    letter-spacing: 0.3px;
+  }
+  .analise-text h2 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--accent);
+    margin: 14px 0 6px;
+    letter-spacing: 0.3px;
+  }
+  .analise-text strong { color: var(--text); font-weight: 600; }
+  .analise-text hr { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+  .analise-text ul { padding-left: 16px; margin-bottom: 8px; }
+  .analise-text li { margin-bottom: 4px; }
   .analise-toggle {
     margin-top: 8px;
     font-size: 12px;
@@ -805,12 +825,50 @@ function GlobalChat({ onClose }) {
   );
 }
 
+function parseBold(text) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, i) =>
+    /^\*\*/.test(part) ? <strong key={i}>{part.replace(/\*\*/g, "")}</strong> : part
+  );
+}
+
+function renderMarkdown(text) {
+  if (!text) return null;
+  const lines = text.split("\n");
+  const elements = [];
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    if (/^###\s/.test(line)) {
+      elements.push(<h3 key={i}>{line.replace(/^###\s*/, "")}</h3>);
+    } else if (/^##\s/.test(line)) {
+      elements.push(<h2 key={i}>{line.replace(/^##\s*/, "")}</h2>);
+    } else if (/^#\s/.test(line)) {
+      elements.push(<h2 key={i}>{line.replace(/^#\s*/, "")}</h2>);
+    } else if (/^---+$/.test(line.trim())) {
+      elements.push(<hr key={i} />);
+    } else if (/^[-*]\s/.test(line)) {
+      const items = [];
+      while (i < lines.length && /^[-*]\s/.test(lines[i])) {
+        items.push(<li key={i}>{parseBold(lines[i].replace(/^[-*]\s*/, ""))}</li>);
+        i++;
+      }
+      elements.push(<ul key={"ul" + i}>{items}</ul>);
+      continue;
+    } else if (line.trim() !== "") {
+      elements.push(<p key={i}>{parseBold(line)}</p>);
+    }
+    i++;
+  }
+  return elements;
+}
+
 function TreinoCard({ treino, defaultOpen }) {
   const [open, setOpen] = useState(defaultOpen || false);
   const [showFull, setShowFull] = useState(false);
   const analise = treino.analysis || "";
-  const analiseShort = analise.slice(0, 400);
-  const hasMore = analise.length > 400;
+  const analiseShort = analise.slice(0, 500);
+  const hasMore = analise.length > 500;
 
   return (
     <div className={`treino-card ${open ? "open" : ""}`}>
@@ -850,8 +908,8 @@ function TreinoCard({ treino, defaultOpen }) {
               <div className="analise-line" />
             </div>
             <div className="analise-text">
-              {showFull ? analise : analiseShort}
-              {hasMore && !showFull && "..."}
+              {renderMarkdown(showFull ? analise : analiseShort)}
+              {hasMore && !showFull && <p style={{color:"var(--text3)"}}>...</p>}
             </div>
             {hasMore && (
               <button className="analise-toggle" onClick={e => { e.stopPropagation(); setShowFull(v => !v); }}>
