@@ -1,6 +1,6 @@
 {
-  "name": "MeuTreinoIA",
-  "short_name": "MeuTreino",
+  "name": "VMIACoachTreino",
+  "short_name": "VMIACoach",
   "description": "Análise de treinos com Coach IA",
   "start_url": "/",
   "display": "standalone",
