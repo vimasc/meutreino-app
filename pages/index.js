@@ -14,15 +14,15 @@ const css = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg:       #080b0f;
-    --bg2:      #0e1218;
-    --card:     #111620;
-    --card2:    #161d2a;
+    --bg:       #0a1520;
+    --bg2:      #0d1e2e;
+    --card:     #0f1e30;
+    --card2:    #132540;
     --border:   rgba(255,255,255,0.07);
     --border2:  rgba(255,255,255,0.12);
-    --accent:   #e8ff00;
-    --accent2:  #ff4d00;
-    --blue:     #00b4ff;
+    --accent:   #1ab3f0;
+    --accent2:  #f46b1a;
+    --blue:     #0e7fd4;
     --text:     #f0f2f5;
     --text2:    #6b7a8d;
     --text3:    #3d4a5c;
@@ -83,8 +83,8 @@ const css = `
     display: flex;
     align-items: center;
     gap: 6px;
-    background: rgba(232,255,0,0.08);
-    border: 1px solid rgba(232,255,0,0.2);
+    background: rgba(26,179,240,0.08);
+    border: 1px solid rgba(26,179,240,0.2);
     border-radius: 20px;
     padding: 5px 12px;
     font-family: 'Barlow Condensed', sans-serif;
@@ -96,7 +96,7 @@ const css = `
     cursor: pointer;
     transition: all 0.2s;
   }
-  .live-pill:hover { background: rgba(232,255,0,0.15); }
+  .live-pill:hover { background: rgba(26,179,240,0.15); }
   .live-dot {
     width: 7px; height: 7px;
     border-radius: 50%;
@@ -122,7 +122,7 @@ const css = `
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 3px;
-    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    background: linear-gradient(90deg, #0e7fd4, #1ab3f0, #f46b1a);
   }
   .hero-label {
     padding: 14px 16px 0;
@@ -212,7 +212,7 @@ const css = `
   .treino-icon {
     width: 38px; height: 38px;
     border-radius: 10px;
-    background: rgba(232,255,0,0.08);
+    background: rgba(26,179,240,0.08);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -454,7 +454,7 @@ const css = `
     transition: all 0.15s;
     white-space: nowrap;
   }
-  .qq:hover { border-color: var(--accent); color: var(--accent); background: rgba(232,255,0,0.05); }
+  .qq:hover { border-color: var(--accent); color: var(--accent); background: rgba(26,179,240,0.05); }
 
   .chat-input-row {
     display: flex;
@@ -477,7 +477,7 @@ const css = `
     transition: border-color 0.2s;
     line-height: 1.4;
   }
-  .chat-input:focus { border-color: rgba(232,255,0,0.4); }
+  .chat-input:focus { border-color: rgba(26,179,240,0.4); }
   .chat-input::placeholder { color: var(--text3); }
   .send-btn {
     width: 38px; height: 38px;
@@ -494,7 +494,7 @@ const css = `
     flex-shrink: 0;
     transition: all 0.15s;
   }
-  .send-btn:hover { transform: scale(1.06); box-shadow: 0 4px 14px rgba(232,255,0,0.3); }
+  .send-btn:hover { transform: scale(1.06); box-shadow: 0 4px 14px rgba(26,179,240,0.3); }
   .send-btn:disabled { background: var(--card2); color: var(--text3); cursor: not-allowed; transform: none; box-shadow: none; }
 
   .fab {
@@ -511,7 +511,7 @@ const css = `
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 6px 24px rgba(232,255,0,0.35);
+    box-shadow: 0 6px 24px rgba(26,179,240,0.35);
     z-index: 100;
     transition: all 0.2s;
   }
@@ -609,7 +609,7 @@ const css = `
     text-align: left;
     transition: all 0.15s;
   }
-  .gs-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(232,255,0,0.04); }
+  .gs-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(26,179,240,0.04); }
 
   .gchat-input-area {
     padding: 10px 12px 20px;
@@ -984,7 +984,7 @@ const loginCss = `
     transition: border-color 0.2s;
     letter-spacing: 2px;
   }
-  .login-input:focus { border-color: rgba(232,255,0,0.4); }
+  .login-input:focus { border-color: rgba(26,179,240,0.4); }
   .login-btn {
     width: 100%;
     padding: 13px;
@@ -999,7 +999,7 @@ const loginCss = `
     cursor: pointer;
     transition: all 0.2s;
   }
-  .login-btn:hover { transform: scale(1.02); box-shadow: 0 4px 20px rgba(232,255,0,0.3); }
+  .login-btn:hover { transform: scale(1.02); box-shadow: 0 4px 20px rgba(26,179,240,0.3); }
   .login-error {
     margin-top: 12px;
     text-align: center;
