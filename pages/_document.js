@@ -9,9 +9,9 @@ export default function Document() {
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="VMIACoachTreino" />
+        <meta name="apple-mobile-web-app-title" content="IA Coach Treino - VM" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
-        <title>VMIACoachTreino</title>
+        <title>IA Coach Treino - VM</title>
       </Head>
       <body>
         <Main />
