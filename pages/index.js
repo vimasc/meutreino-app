@@ -925,7 +925,7 @@ function TreinoCard({ treino, defaultOpen }) {
   );
 }
 
-const APP_PASSWORD = process.env.NEXT_PUBLIC_APP_PASSWORD || "IAMeuTreinoVini2026";
+const APP_PASSWORD = process.env.NEXT_PUBLIC_APP_PASSWORD || "IAVMIACoachVini2026";
 
 const loginCss = `
   .login-screen {
@@ -1053,7 +1053,7 @@ export default function Home() {
         <style>{css}</style>
         <style>{loginCss}</style>
         <div className="login-screen">
-          <div className="login-logo">Meu<span>Treino</span>IA</div>
+          <div className="login-logo">VMIA<span>Coach</span>Treino</div>
           <div className="login-sub">Acesso restrito</div>
           <div className="login-box">
             <span className="login-label">🔑 Senha</span>
@@ -1081,7 +1081,7 @@ export default function Home() {
       <style>{css}</style>
       <div className="app">
         <header className="header">
-          <span className="logo-main">Meu<span>Treino</span>IA</span>
+          <span className="logo-main">VMIA<span>Coach</span>Treino</span>
           <div className="live-pill" onClick={() => setGchat(true)}>
             <div className="live-dot" />
             Coach
