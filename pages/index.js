@@ -268,6 +268,90 @@ const css = `
   }
   .treino-card.open .chevron { transform: rotate(180deg); color: var(--accent); }
 
+  .delete-btn {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text3);
+    font-size: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    margin-left: 2px;
+  }
+  .delete-btn:hover { border-color: #ff4466; color: #ff4466; background: rgba(255,68,102,0.08); }
+
+  .confirm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    animation: fadein 0.15s;
+  }
+  .confirm-box {
+    background: var(--card);
+    border: 1px solid var(--border2);
+    border-radius: 18px;
+    padding: 24px 20px;
+    width: 100%;
+    max-width: 320px;
+    text-align: center;
+    animation: slideup 0.2s cubic-bezier(0.4,0,0.2,1);
+  }
+  .confirm-icon { font-size: 36px; margin-bottom: 12px; }
+  .confirm-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .confirm-desc {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.5;
+    margin-bottom: 20px;
+  }
+  .confirm-desc strong { color: var(--text); }
+  .confirm-btns { display: flex; gap: 10px; }
+  .confirm-cancel {
+    flex: 1;
+    padding: 11px;
+    border-radius: 10px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--text2);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .confirm-cancel:hover { border-color: var(--text); color: var(--text); }
+  .confirm-delete {
+    flex: 1;
+    padding: 11px;
+    border-radius: 10px;
+    border: none;
+    background: #ff4466;
+    color: #fff;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .confirm-delete:hover { background: #e0335a; }
+  .confirm-delete:disabled { opacity: 0.6; cursor: not-allowed; }
+
   .treino-panel {
     max-height: 0;
     overflow: hidden;
@@ -863,27 +947,39 @@ function renderMarkdown(text) {
   return elements;
 }
 
-function TreinoCard({ treino, defaultOpen }) {
+function TreinoCard({ treino, defaultOpen, onDelete }) {
   const [open, setOpen] = useState(defaultOpen || false);
   const [showFull, setShowFull] = useState(false);
+  const [confirm, setConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const analise = treino.analysis || "";
   const analiseShort = analise.slice(0, 500);
   const hasMore = analise.length > 500;
 
+  async function handleDelete() {
+    setDeleting(true);
+    await supabase.from("analyses").delete().eq("id", treino.id);
+    setDeleting(false);
+    setConfirm(false);
+    onDelete(treino.id);
+  }
+
   return (
-    <div className={`treino-card ${open ? "open" : ""}`}>
-      <div className="treino-row" onClick={() => setOpen(o => !o)}>
-        <div className="treino-icon">🏃</div>
-        <div className="treino-info">
-          <div className="treino-nome">{treino.activity_name || "Treino"}</div>
-          <div className="treino-meta">{fmt(treino.created_at)} · {treino.duration_min ? `${Math.round(treino.duration_min)} min` : "—"}</div>
+    <>
+      <div className={`treino-card ${open ? "open" : ""}`}>
+        <div className="treino-row" onClick={() => setOpen(o => !o)}>
+          <div className="treino-icon">🏃</div>
+          <div className="treino-info">
+            <div className="treino-nome">{treino.activity_name || "Treino"}</div>
+            <div className="treino-meta">{fmt(treino.created_at)} · {treino.duration_min ? `${Math.round(treino.duration_min)} min` : "—"}</div>
+          </div>
+          <div className="treino-badges">
+            <span className="badge-pace">{treino.pace || "—"}</span>
+            <span className="badge-dist">{treino.distance_km ? `${treino.distance_km} km` : "—"}</span>
+          </div>
+          <button className="delete-btn" onClick={e => { e.stopPropagation(); setConfirm(true); }} title="Deletar treino">🗑</button>
+          <span className="chevron">▼</span>
         </div>
-        <div className="treino-badges">
-          <span className="badge-pace">{treino.pace || "—"}</span>
-          <span className="badge-dist">{treino.distance_km ? `${treino.distance_km} km` : "—"}</span>
-        </div>
-        <span className="chevron">▼</span>
-      </div>
 
       <div className="treino-panel">
         <div className="stats-strip">
@@ -922,6 +1018,25 @@ function TreinoCard({ treino, defaultOpen }) {
         <ChatBlock treino={treino} />
       </div>
     </div>
+
+      {confirm && (
+        <div className="confirm-overlay" onClick={() => setConfirm(false)}>
+          <div className="confirm-box" onClick={e => e.stopPropagation()}>
+            <div className="confirm-icon">🗑️</div>
+            <div className="confirm-title">Deletar treino?</div>
+            <div className="confirm-desc">
+              <strong>{treino.activity_name || "Treino"}</strong> será removido permanentemente. Esta ação não pode ser desfeita.
+            </div>
+            <div className="confirm-btns">
+              <button className="confirm-cancel" onClick={() => setConfirm(false)}>Cancelar</button>
+              <button className="confirm-delete" onClick={handleDelete} disabled={deleting}>
+                {deleting ? "Deletando..." : "Deletar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -1016,6 +1131,10 @@ export default function Home() {
   const [treinos, setTreinos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [gchat, setGchat] = useState(false);
+
+  function handleDelete(id) {
+    setTreinos(prev => prev.filter(t => t.id !== id));
+  }
 
   useEffect(() => {
     if (typeof window !== "undefined" && sessionStorage.getItem("mti_auth") === "1") {
@@ -1131,7 +1250,7 @@ export default function Home() {
                 </div>
               ) : (
                 treinos.map((t, i) => (
-                  <TreinoCard key={t.id} treino={t} defaultOpen={i === 0} />
+                  <TreinoCard key={t.id} treino={t} defaultOpen={i === 0} onDelete={handleDelete} />
                 ))
               )}
             </div>
