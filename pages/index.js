@@ -1137,7 +1137,7 @@ export default function Home() {
   }
 
   useEffect(() => {
-    if (typeof window !== "undefined" && sessionStorage.getItem("mti_auth") === "1") {
+    if (typeof window !== "undefined" && localStorage.getItem("mti_auth") === "1") {
       setAuth(true);
     }
   }, []);
@@ -1157,7 +1157,7 @@ export default function Home() {
 
   function handleLogin() {
     if (pwInput === APP_PASSWORD) {
-      sessionStorage.setItem("mti_auth", "1");
+      localStorage.setItem("mti_auth", "1");
       setAuth(true);
       setPwError(false);
     } else {
