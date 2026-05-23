@@ -1237,7 +1237,7 @@ const ALL_FIELDS = [
   { key: "distance_km", label: "Distância", icon: "📏", unit: "km" },
   { key: "pace", label: "Pace", icon: "⚡", unit: "min/km" },
   { key: "heart_rate_avg", label: "FC Média", icon: "❤️", unit: "bpm" },
-  { key: "duration_min", label: "Duração", icon: "⏱️", unit: "min", fmt: v => Math.round(v) },
+  { key: "duration_min", label: "Duração", icon: "⏱️", unit: "", fmt: v => { const h = Math.floor(v/60); const m = Math.round(v%60); return h > 0 ? `${h}h${m.toString().padStart(2,"0")}` : `${m}min`; } },
   { key: "heart_rate_max", label: "FC Máxima", icon: "💓", unit: "bpm" },
   { key: "elevation", label: "Altimetria", icon: "⛰️", unit: "m" },
   { key: "calories", label: "Calorias", icon: "🔥", unit: "kcal" },
@@ -1247,7 +1247,7 @@ const ALL_FIELDS = [
 function generateSummary(treino, fields) {
   const parts = [];
   if (fields.includes("distance_km") && treino.distance_km) parts.push(`${treino.distance_km}km`);
-  if (fields.includes("duration_min") && treino.duration_min) parts.push(`${Math.round(treino.duration_min)}min`);
+  if (fields.includes("duration_min") && treino.duration_min) { const h = Math.floor(treino.duration_min/60); const m = Math.round(treino.duration_min%60); parts.push(h > 0 ? `${h}h${m.toString().padStart(2,"0")}` : `${m}min`); }
   if (fields.includes("pace") && treino.pace) parts.push(`pace ${treino.pace}/km`);
   if (fields.includes("heart_rate_avg") && treino.heart_rate_avg) parts.push(`FC média ${Math.round(treino.heart_rate_avg)}bpm`);
   if (fields.includes("elevation") && treino.elevation) parts.push(`${treino.elevation}m de ganho altimétrico`);
@@ -1328,11 +1328,10 @@ function ExportModal({ treino, onClose }) {
           <div className="export-section-title">Selecione os dados</div>
           <div className="export-checkboxes">
             {ALL_FIELDS.map(f => (
-              <label key={f.key} className={`export-check ${selected.includes(f.key) ? "checked" : ""}`} onClick={() => toggleField(f.key)}>
-                <input type="checkbox" checked={selected.includes(f.key)} readOnly />
+              <div key={f.key} className={`export-check ${selected.includes(f.key) ? "checked" : ""}`} onClick={() => toggleField(f.key)}>
                 <span className="export-check-icon">{f.icon}</span>
                 <span className="export-check-label">{f.label}</span>
-              </label>
+              </div>
             ))}
           </div>
 
@@ -1505,7 +1504,7 @@ function TreinoCard({ treino, defaultOpen, onDelete }) {
           <div className="treino-icon">🏃</div>
           <div className="treino-info">
             <div className="treino-nome">{treino.activity_name || "Treino"}</div>
-            <div className="treino-meta">{fmt(treino.created_at)} · {treino.duration_min ? `${Math.round(treino.duration_min)} min` : "—"}</div>
+            <div className="treino-meta">{fmt(treino.created_at)} · {treino.duration_min ? (() => { const h = Math.floor(treino.duration_min/60); const m = Math.round(treino.duration_min%60); return h > 0 ? `${h}h${m.toString().padStart(2,"0")}` : `${m}min`; })() : "—"}</div>
           </div>
           <div className="treino-badges">
             <span className="badge-pace">{treino.pace || "—"}</span>
@@ -1526,7 +1525,7 @@ function TreinoCard({ treino, defaultOpen, onDelete }) {
             <span className="sstat-lbl">bpm</span>
           </div>
           <div className="sstat">
-            <span className="sstat-val">{treino.duration_min ? Math.round(treino.duration_min) : "—"}</span>
+            <span className="sstat-val">{treino.duration_min ? (() => { const h = Math.floor(treino.duration_min/60); const m = Math.round(treino.duration_min%60); return h > 0 ? `${h}h${m.toString().padStart(2,"0")}` : `${m}min`; })() : "—"}</span>
             <span className="sstat-lbl">min</span>
           </div>
         </div>
@@ -1774,7 +1773,7 @@ export default function Home() {
                       <span className="hero-stat-lbl">bpm</span>
                     </div>
                     <div className="hero-stat">
-                      <span className="hero-stat-val">{ultimo.duration_min ? Math.round(ultimo.duration_min) : "—"}</span>
+                      <span className="hero-stat-val">{ultimo.duration_min ? (() => { const h = Math.floor(ultimo.duration_min/60); const m = Math.round(ultimo.duration_min%60); return h > 0 ? `${h}h${m.toString().padStart(2,"0")}` : `${m}min`; })() : "—"}</span>
                       <span className="hero-stat-lbl">min</span>
                     </div>
                   </div>
