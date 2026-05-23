@@ -285,6 +285,57 @@ const css = `
   }
   .delete-btn:hover { border-color: #ff4466; color: #ff4466; background: rgba(255,68,102,0.08); }
 
+  .map-block {
+    border-top: 1px solid var(--border);
+  }
+  .map-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 14px 0;
+    margin-bottom: 10px;
+  }
+  .map-tag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #00e676;
+    text-transform: uppercase;
+  }
+  .map-toggle-btn {
+    margin-left: auto;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(0,230,118,0.3);
+    background: rgba(0,230,118,0.08);
+    color: #00e676;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .map-toggle-btn:hover { background: rgba(0,230,118,0.18); }
+  .map-container {
+    height: 300px;
+    margin: 0 14px 14px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border2);
+    position: relative;
+  }
+  .map-no-route {
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text2);
+    font-size: 13px;
+    padding: 0 14px 14px;
+  }
+
   .confirm-overlay {
     position: fixed;
     inset: 0;
@@ -947,6 +998,84 @@ function renderMarkdown(text) {
   return elements;
 }
 
+function MapBlock({ treino }) {
+  const [show, setShow] = useState(false);
+  const mapRef = useRef(null);
+  const mapInstanceRef = useRef(null);
+
+  useEffect(() => {
+    if (!show || !treino.polyline) return;
+    if (mapInstanceRef.current) return;
+
+    const timeout = setTimeout(() => {
+      if (!mapRef.current || typeof window === "undefined" || !window.L) return;
+
+      // Decode polyline
+      const L = window.L;
+      const coords = L.Polyline.fromEncoded(treino.polyline).getLatLngs();
+      if (!coords.length) return;
+
+      const map = L.map(mapRef.current, {
+        zoomControl: true,
+        scrollWheelZoom: true,
+      });
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap",
+        maxZoom: 18,
+      }).addTo(map);
+
+      // Draw route
+      const polyline = L.polyline(coords, {
+        color: "#1ab3f0",
+        weight: 4,
+        opacity: 0.9,
+      }).addTo(map);
+
+      // Start marker (green)
+      L.circleMarker(coords[0], {
+        radius: 8, fillColor: "#00e676", color: "#fff",
+        weight: 2, fillOpacity: 1,
+      }).addTo(map).bindPopup("🏁 Início");
+
+      // End marker (orange)
+      L.circleMarker(coords[coords.length - 1], {
+        radius: 8, fillColor: "#f46b1a", color: "#fff",
+        weight: 2, fillOpacity: 1,
+      }).addTo(map).bindPopup("🏆 Fim");
+
+      map.fitBounds(polyline.getBounds(), { padding: [20, 20] });
+      mapInstanceRef.current = map;
+    }, 100);
+
+    return () => clearTimeout(timeout);
+  }, [show, treino.polyline]);
+
+  if (!treino.polyline) {
+    return (
+      <div className="map-block">
+        <div className="map-header">
+          <span className="map-tag">🗺️ Rota</span>
+        </div>
+        <div className="map-no-route">Rota não disponível para este treino</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="map-block">
+      <div className="map-header">
+        <span className="map-tag">🗺️ Rota GPS</span>
+        <div className="analise-line" />
+        <button className="map-toggle-btn" onClick={() => setShow(v => !v)}>
+          {show ? "FECHAR MAPA" : "VER MAPA"}
+        </button>
+      </div>
+      {show && <div className="map-container" ref={mapRef} />}
+    </div>
+  );
+}
+
 function TreinoCard({ treino, defaultOpen, onDelete }) {
   const [open, setOpen] = useState(defaultOpen || false);
   const [showFull, setShowFull] = useState(false);
@@ -1016,6 +1145,7 @@ function TreinoCard({ treino, defaultOpen, onDelete }) {
         )}
 
         <ChatBlock treino={treino} />
+        <MapBlock treino={treino} />
       </div>
     </div>
 
