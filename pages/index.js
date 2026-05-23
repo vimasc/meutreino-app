@@ -1385,7 +1385,9 @@ function ExportModal({ treino, onClose }) {
           const toX = lng => pad + ((lng - minLng) / (maxLng - minLng || 1)) * (W - pad * 2);
           const toY = lat => y + pad + ((maxLat - lat) / (maxLat - minLat || 1)) * (MAP_H - pad * 2);
 
-          // Draw route
+          // Draw route with glow
+          ctx.shadowColor = "#1ab3f0";
+          ctx.shadowBlur = 6;
           ctx.beginPath();
           ctx.strokeStyle = "#1ab3f0";
           ctx.lineWidth = 3;
@@ -1394,11 +1396,14 @@ function ExportModal({ treino, onClose }) {
           ctx.moveTo(toX(coords[0][1]), toY(coords[0][0]));
           coords.forEach(c => ctx.lineTo(toX(c[1]), toY(c[0])));
           ctx.stroke();
+          ctx.shadowBlur = 0;
+
+          const lastCoord = coords[coords.length - 1];
 
           // Start marker
           ctx.beginPath();
           ctx.fillStyle = "#00e676";
-          ctx.arc(toX(coords[0][1]), toY(coords[0][0]), 7, 0, Math.PI * 2);
+          ctx.arc(toX(coords[0][1]), toY(coords[0][0]), 8, 0, Math.PI * 2);
           ctx.fill();
           ctx.strokeStyle = "#fff";
           ctx.lineWidth = 2;
@@ -1407,7 +1412,7 @@ function ExportModal({ treino, onClose }) {
           // End marker
           ctx.beginPath();
           ctx.fillStyle = "#f46b1a";
-          ctx.arc(toX(coords[coords.length-1][1]), toY(coords[coords.length-1][0]), 7, 0, Math.PI * 2);
+          ctx.arc(toX(lastCoord[1]), toY(lastCoord[0]), 8, 0, Math.PI * 2);
           ctx.fill();
           ctx.strokeStyle = "#fff";
           ctx.lineWidth = 2;
@@ -1440,15 +1445,21 @@ function ExportModal({ treino, onClose }) {
           // Value
           const raw = treino[f.key];
           const val = f.fmt ? f.fmt(raw) : raw;
+          const valStr = String(val);
           ctx.fillStyle = "#1ab3f0";
           ctx.font = "bold 22px Arial";
-          ctx.fillText(String(val), sx + 44, sy + 30);
+          ctx.fillText(valStr, sx + 44, sy + 30);
 
-          // Unit
+          // Unit - positioned after value with proper spacing
           if (f.unit) {
             ctx.fillStyle = "#6b7a8d";
-            ctx.font = "12px Arial";
-            ctx.fillText(f.unit, sx + 44 + ctx.measureText(String(val)).width + 4, sy + 30);
+            ctx.font = "11px Arial";
+            const valWidth = ctx.measureText(valStr).width;
+            // measure with bold font first
+            ctx.font = "bold 22px Arial";
+            const boldWidth = ctx.measureText(valStr).width;
+            ctx.font = "11px Arial";
+            ctx.fillText(f.unit, sx + 44 + boldWidth + 4, sy + 30);
           }
 
           // Label
