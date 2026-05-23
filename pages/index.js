@@ -1309,35 +1309,178 @@ function ExportModal({ treino, onClose }) {
   }
 
   async function handleDownload() {
-    if (!exportRef.current || typeof window === "undefined" || !window.html2canvas) return;
     setGenerating(true);
     try {
-      const el = exportRef.current;
-      const fullHeight = el.scrollHeight;
-      const fullWidth = el.scrollWidth;
+      const W = 720;
+      const fields = ALL_FIELDS.filter(f => selected.includes(f.key) && treino[f.key]);
+      const summary = generateSummary(treino, selected);
+      const summaryLines = summary ? wrapText(summary, 62) : [];
 
-      const canvas = await window.html2canvas(el, {
-        backgroundColor: "#0a1520",
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        width: fullWidth,
-        height: fullHeight,
-        windowWidth: fullWidth,
-        scrollX: 0,
-        scrollY: 0,
-        x: 0,
-        y: 0,
-      });
+      // Calculate total height
+      const HEADER_H = 56;
+      const NAME_H = 52;
+      const MAP_H = treino.polyline ? 280 : 0;
+      const STATS_H = fields.length > 0 ? Math.ceil(fields.length / 2) * 64 : 0;
+      const SUMMARY_H = summaryLines.length > 0 ? 30 + summaryLines.length * 22 + 24 : 0;
+      const FOOTER_H = 40;
+      const TOTAL_H = HEADER_H + NAME_H + MAP_H + STATS_H + SUMMARY_H + FOOTER_H;
+
+      const canvas = document.createElement("canvas");
+      canvas.width = W * 2;
+      canvas.height = TOTAL_H * 2;
+      const ctx = canvas.getContext("2d");
+      ctx.scale(2, 2);
+
+      // Background
+      ctx.fillStyle = "#0a1520";
+      ctx.fillRect(0, 0, W, TOTAL_H);
+
+      // Header
+      const grad = ctx.createLinearGradient(0, 0, W, HEADER_H);
+      grad.addColorStop(0, "#0d1e2e");
+      grad.addColorStop(1, "#132540");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, W, HEADER_H);
+
+      ctx.fillStyle = "rgba(255,255,255,0.45)";
+      ctx.font = "bold 13px Arial";
+      ctx.fillText("IA COACH", 20, 28);
+      ctx.fillStyle = "#1ab3f0";
+      ctx.fillText(" TREINO", 20 + ctx.measureText("IA COACH").width, 28);
+      ctx.fillStyle = "rgba(255,255,255,0.45)";
+      ctx.fillText(" · VM", 20 + ctx.measureText("IA COACH TREINO").width, 28);
+
+      ctx.fillStyle = "rgba(255,255,255,0.35)";
+      ctx.font = "12px Arial";
+      ctx.fillText(fmt(treino.created_at), W - 60, 28);
+
+      // Activity type badge
+      ctx.fillStyle = "#f46b1a";
+      ctx.font = "bold 11px Arial";
+      ctx.fillText((treino.activity_type || "RUN").toUpperCase(), 20, 48);
+
+      // Activity name
+      ctx.fillStyle = "#f0f2f5";
+      ctx.font = "bold 32px Arial";
+      ctx.fillText(treino.activity_name || "Treino", 20, HEADER_H + 36);
+
+      let y = HEADER_H + NAME_H;
+
+      // Map placeholder (we'll use the existing Leaflet map screenshot)
+      if (treino.polyline && exportMapRef.current) {
+        const mapEl = exportMapRef.current;
+        try {
+          const mapCanvas = await window.html2canvas(mapEl, {
+            useCORS: true, allowTaint: true, logging: false,
+            width: mapEl.offsetWidth, height: mapEl.offsetHeight,
+          });
+          ctx.drawImage(mapCanvas, 0, y, W, MAP_H);
+        } catch {
+          ctx.fillStyle = "#0d1e2e";
+          ctx.fillRect(0, y, W, MAP_H);
+          ctx.fillStyle = "#1ab3f0";
+          ctx.font = "16px Arial";
+          ctx.textAlign = "center";
+          ctx.fillText("🗺️ Rota GPS", W / 2, y + MAP_H / 2);
+          ctx.textAlign = "left";
+        }
+        y += MAP_H;
+      }
+
+      // Separator
+      ctx.fillStyle = "rgba(255,255,255,0.06)";
+      ctx.fillRect(0, y, W, 1);
+
+      // Stats
+      if (fields.length > 0) {
+        const cols = 2;
+        const colW = W / cols;
+        fields.forEach((f, idx) => {
+          const col = idx % cols;
+          const row = Math.floor(idx / cols);
+          const sx = col * colW;
+          const sy = y + row * 64;
+
+          ctx.fillStyle = "#0f1e30";
+          ctx.fillRect(sx, sy, colW - 1, 63);
+
+          // Icon
+          ctx.font = "20px Arial";
+          ctx.fillText(f.icon, sx + 12, sy + 36);
+
+          // Value
+          const raw = treino[f.key];
+          const val = f.fmt ? f.fmt(raw) : raw;
+          ctx.fillStyle = "#1ab3f0";
+          ctx.font = "bold 22px Arial";
+          ctx.fillText(String(val), sx + 44, sy + 30);
+
+          // Unit
+          if (f.unit) {
+            ctx.fillStyle = "#6b7a8d";
+            ctx.font = "12px Arial";
+            ctx.fillText(f.unit, sx + 44 + ctx.measureText(String(val)).width + 4, sy + 30);
+          }
+
+          // Label
+          ctx.fillStyle = "#6b7a8d";
+          ctx.font = "10px Arial";
+          ctx.fillText(f.label.toUpperCase(), sx + 44, sy + 48);
+        });
+        y += Math.ceil(fields.length / 2) * 64;
+      }
+
+      // Summary
+      if (summaryLines.length > 0) {
+        ctx.fillStyle = "#0f1e30";
+        ctx.fillRect(0, y, W, SUMMARY_H);
+        ctx.fillStyle = "#f46b1a";
+        ctx.font = "bold 11px Arial";
+        ctx.fillText("⚡ RESUMO DO COACH", 16, y + 20);
+        ctx.fillStyle = "#9aa5b4";
+        ctx.font = "13px Arial";
+        summaryLines.forEach((line, i) => {
+          ctx.fillText(line, 16, y + 38 + i * 22);
+        });
+        y += SUMMARY_H;
+      }
+
+      // Footer
+      ctx.fillStyle = "#080b14";
+      ctx.fillRect(0, y, W, FOOTER_H);
+      ctx.fillStyle = "rgba(255,255,255,0.2)";
+      ctx.font = "11px Arial";
+      ctx.fillText("IACOACHTREINO.APP", 16, y + 24);
+      ctx.fillStyle = "#1ab3f0";
+      ctx.beginPath();
+      ctx.arc(W - 20, y + 20, 5, 0, Math.PI * 2);
+      ctx.fill();
+
       const link = document.createElement("a");
       link.download = `${(treino.activity_name || "treino").replace(/\s+/g, "_")}_${fmt(treino.created_at)}.jpg`;
       link.href = canvas.toDataURL("image/jpeg", 0.92);
       link.click();
     } catch (e) {
+      console.error(e);
       alert("Erro ao gerar imagem. Tente novamente.");
     }
     setGenerating(false);
+  }
+
+  function wrapText(text, maxChars) {
+    const words = text.split(" ");
+    const lines = [];
+    let line = "";
+    words.forEach(word => {
+      if ((line + " " + word).trim().length <= maxChars) {
+        line = (line + " " + word).trim();
+      } else {
+        if (line) lines.push(line);
+        line = word;
+      }
+    });
+    if (line) lines.push(line);
+    return lines.slice(0, 5);
   }
 
   const visibleFields = ALL_FIELDS.filter(f => selected.includes(f.key) && treino[f.key]);
