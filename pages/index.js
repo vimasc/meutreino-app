@@ -448,14 +448,16 @@ const css = `
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 8px;
   }
   .export-card-logo {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 800;
     color: rgba(255,255,255,0.5);
     text-transform: uppercase;
     letter-spacing: 1px;
+    flex-shrink: 0;
   }
   .export-card-logo span { color: #1ab3f0; }
   .export-card-date {
@@ -463,17 +465,21 @@ const css = `
     font-size: 12px;
     color: rgba(255,255,255,0.4);
     letter-spacing: 0.5px;
+    flex-shrink: 0;
   }
   .export-card-name {
     padding: 10px 16px 4px;
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 26px;
+    font-size: 22px;
     font-weight: 900;
     color: #f0f2f5;
     letter-spacing: -0.3px;
+    word-break: break-word;
+    line-height: 1.2;
   }
   .export-map-area {
-    height: 220px;
+    height: 200px;
+    width: 100%;
     background: #0d1e2e;
     position: relative;
     overflow: hidden;
@@ -1301,6 +1307,8 @@ function ExportModal({ treino, onClose }) {
         useCORS: true,
         allowTaint: true,
         logging: false,
+        width: exportRef.current.offsetWidth,
+        windowWidth: exportRef.current.offsetWidth,
       });
       const link = document.createElement("a");
       link.download = `${(treino.activity_name || "treino").replace(/\s+/g, "_")}_${fmt(treino.created_at)}.png`;
