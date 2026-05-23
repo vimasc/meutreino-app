@@ -12,6 +12,8 @@ export default function Document() {
         <meta name="apple-mobile-web-app-title" content="IA Coach Treino - VM" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
         <title>IA Coach Treino - VM</title>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
       </Head>
       <body>
         <Main />
