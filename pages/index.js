@@ -1366,23 +1366,52 @@ function ExportModal({ treino, onClose }) {
 
       let y = HEADER_H + NAME_H;
 
-      // Map placeholder (we'll use the existing Leaflet map screenshot)
-      if (treino.polyline && exportMapRef.current) {
-        const mapEl = exportMapRef.current;
-        try {
-          const mapCanvas = await window.html2canvas(mapEl, {
-            useCORS: true, allowTaint: true, logging: false,
-            width: mapEl.offsetWidth, height: mapEl.offsetHeight,
-          });
-          ctx.drawImage(mapCanvas, 0, y, W, MAP_H);
-        } catch {
-          ctx.fillStyle = "#0d1e2e";
-          ctx.fillRect(0, y, W, MAP_H);
-          ctx.fillStyle = "#1ab3f0";
-          ctx.font = "16px Arial";
-          ctx.textAlign = "center";
-          ctx.fillText("🗺️ Rota GPS", W / 2, y + MAP_H / 2);
-          ctx.textAlign = "left";
+      // Map - draw route directly on canvas (works on mobile)
+      if (treino.polyline) {
+        // Draw dark background
+        ctx.fillStyle = "#0d1e2e";
+        ctx.fillRect(0, y, W, MAP_H);
+
+        // Decode and draw route
+        const coords = decodePolyline(treino.polyline);
+        if (coords.length > 1) {
+          // Find bounds
+          const lats = coords.map(c => c[0]);
+          const lngs = coords.map(c => c[1]);
+          const minLat = Math.min(...lats), maxLat = Math.max(...lats);
+          const minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
+          const pad = 20;
+
+          const toX = lng => pad + ((lng - minLng) / (maxLng - minLng || 1)) * (W - pad * 2);
+          const toY = lat => y + pad + ((maxLat - lat) / (maxLat - minLat || 1)) * (MAP_H - pad * 2);
+
+          // Draw route
+          ctx.beginPath();
+          ctx.strokeStyle = "#1ab3f0";
+          ctx.lineWidth = 3;
+          ctx.lineJoin = "round";
+          ctx.lineCap = "round";
+          ctx.moveTo(toX(coords[0][1]), toY(coords[0][0]));
+          coords.forEach(c => ctx.lineTo(toX(c[1]), toY(c[0])));
+          ctx.stroke();
+
+          // Start marker
+          ctx.beginPath();
+          ctx.fillStyle = "#00e676";
+          ctx.arc(toX(coords[0][1]), toY(coords[0][0]), 7, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = "#fff";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          // End marker
+          ctx.beginPath();
+          ctx.fillStyle = "#f46b1a";
+          ctx.arc(toX(coords[coords.length-1][1]), toY(coords[coords.length-1][0]), 7, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = "#fff";
+          ctx.lineWidth = 2;
+          ctx.stroke();
         }
         y += MAP_H;
       }
