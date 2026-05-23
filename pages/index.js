@@ -1278,7 +1278,7 @@ function ExportModal({ treino, onClose }) {
       const coords = decodePolyline(treino.polyline);
       if (!coords.length) return;
       const map = L.map(exportMapRef.current, { zoomControl: false, dragging: false, scrollWheelZoom: false, attributionControl: false });
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18 }).addTo(map);
+      L.tileLayer("https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png", { maxZoom: 20 }).addTo(map);
       const poly = L.polyline(coords, { color: "#1ab3f0", weight: 5, opacity: 1 }).addTo(map);
       L.circleMarker(coords[0], { radius: 7, fillColor: "#00e676", color: "#fff", weight: 2, fillOpacity: 1 }).addTo(map);
       L.circleMarker(coords[coords.length - 1], { radius: 7, fillColor: "#f46b1a", color: "#fff", weight: 2, fillOpacity: 1 }).addTo(map);
@@ -1426,9 +1426,9 @@ function MapBlock({ treino }) {
         scrollWheelZoom: true,
       });
 
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "© OpenStreetMap",
-        maxZoom: 18,
+      L.tileLayer("https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png", {
+        attribution: "© Stadia Maps © OpenMapTiles © OpenStreetMap",
+        maxZoom: 20,
       }).addTo(map);
 
       const polyline = L.polyline(coords, {
