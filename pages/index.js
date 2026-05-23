@@ -998,6 +998,21 @@ function renderMarkdown(text) {
   return elements;
 }
 
+function decodePolyline(encoded) {
+  const coords = [];
+  let index = 0, lat = 0, lng = 0;
+  while (index < encoded.length) {
+    let shift = 0, result = 0, b;
+    do { b = encoded.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+    lat += (result & 1) ? ~(result >> 1) : result >> 1;
+    shift = 0; result = 0;
+    do { b = encoded.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+    lng += (result & 1) ? ~(result >> 1) : result >> 1;
+    coords.push([lat / 1e5, lng / 1e5]);
+  }
+  return coords;
+}
+
 function MapBlock({ treino }) {
   const [show, setShow] = useState(false);
   const mapRef = useRef(null);
@@ -1010,9 +1025,8 @@ function MapBlock({ treino }) {
     const timeout = setTimeout(() => {
       if (!mapRef.current || typeof window === "undefined" || !window.L) return;
 
-      // Decode polyline
       const L = window.L;
-      const coords = L.Polyline.fromEncoded(treino.polyline).getLatLngs();
+      const coords = decodePolyline(treino.polyline);
       if (!coords.length) return;
 
       const map = L.map(mapRef.current, {
@@ -1025,20 +1039,17 @@ function MapBlock({ treino }) {
         maxZoom: 18,
       }).addTo(map);
 
-      // Draw route
       const polyline = L.polyline(coords, {
         color: "#1ab3f0",
         weight: 4,
         opacity: 0.9,
       }).addTo(map);
 
-      // Start marker (green)
       L.circleMarker(coords[0], {
         radius: 8, fillColor: "#00e676", color: "#fff",
         weight: 2, fillOpacity: 1,
       }).addTo(map).bindPopup("🏁 Início");
 
-      // End marker (orange)
       L.circleMarker(coords[coords.length - 1], {
         radius: 8, fillColor: "#f46b1a", color: "#fff",
         weight: 2, fillOpacity: 1,
@@ -1046,7 +1057,7 @@ function MapBlock({ treino }) {
 
       map.fitBounds(polyline.getBounds(), { padding: [20, 20] });
       mapInstanceRef.current = map;
-    }, 100);
+    }, 200);
 
     return () => clearTimeout(timeout);
   }, [show, treino.polyline]);
