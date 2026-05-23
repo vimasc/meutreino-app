@@ -1331,8 +1331,8 @@ function ExportModal({ treino, onClose }) {
         y: 0,
       });
       const link = document.createElement("a");
-      link.download = `${(treino.activity_name || "treino").replace(/\s+/g, "_")}_${fmt(treino.created_at)}.png`;
-      link.href = canvas.toDataURL("image/png");
+      link.download = `${(treino.activity_name || "treino").replace(/\s+/g, "_")}_${fmt(treino.created_at)}.jpg`;
+      link.href = canvas.toDataURL("image/jpeg", 0.92);
       link.click();
     } catch (e) {
       alert("Erro ao gerar imagem. Tente novamente.");
@@ -1410,7 +1410,7 @@ function ExportModal({ treino, onClose }) {
 
         <div className="export-actions">
           <button className="export-download-btn" onClick={handleDownload} disabled={generating}>
-            {generating ? "Gerando..." : "📥 Baixar PNG"}
+            {generating ? "Gerando..." : "📥 Baixar JPEG"}
           </button>
         </div>
       </div>
