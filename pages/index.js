@@ -1283,14 +1283,25 @@ function ExportModal({ treino, onClose }) {
       if (!exportMapRef.current) return;
       const coords = decodePolyline(treino.polyline);
       if (!coords.length) return;
-      const map = L.map(exportMapRef.current, { zoomControl: false, dragging: false, scrollWheelZoom: false, attributionControl: false });
+      const map = L.map(exportMapRef.current, {
+        zoomControl: false,
+        dragging: false,
+        scrollWheelZoom: false,
+        attributionControl: false,
+        fadeAnimation: false,
+      });
       L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", { maxZoom: 20 }).addTo(map);
       const poly = L.polyline(coords, { color: "#1ab3f0", weight: 5, opacity: 1 }).addTo(map);
       L.circleMarker(coords[0], { radius: 7, fillColor: "#00e676", color: "#fff", weight: 2, fillOpacity: 1 }).addTo(map);
       L.circleMarker(coords[coords.length - 1], { radius: 7, fillColor: "#f46b1a", color: "#fff", weight: 2, fillOpacity: 1 }).addTo(map);
-      map.fitBounds(poly.getBounds(), { padding: [16, 16] });
+      map.invalidateSize();
+      map.fitBounds(poly.getBounds(), { padding: [20, 20] });
+      setTimeout(() => {
+        map.invalidateSize();
+        map.fitBounds(poly.getBounds(), { padding: [20, 20] });
+      }, 500);
       exportMapInstance.current = map;
-    }, 300);
+    }, 400);
   }, [treino.polyline]);
 
   function toggleField(key) {
@@ -1301,14 +1312,23 @@ function ExportModal({ treino, onClose }) {
     if (!exportRef.current || typeof window === "undefined" || !window.html2canvas) return;
     setGenerating(true);
     try {
-      const canvas = await window.html2canvas(exportRef.current, {
+      const el = exportRef.current;
+      const fullHeight = el.scrollHeight;
+      const fullWidth = el.scrollWidth;
+
+      const canvas = await window.html2canvas(el, {
         backgroundColor: "#0a1520",
         scale: 2,
         useCORS: true,
         allowTaint: true,
         logging: false,
-        width: exportRef.current.offsetWidth,
-        windowWidth: exportRef.current.offsetWidth,
+        width: fullWidth,
+        height: fullHeight,
+        windowWidth: fullWidth,
+        scrollX: 0,
+        scrollY: 0,
+        x: 0,
+        y: 0,
       });
       const link = document.createElement("a");
       link.download = `${(treino.activity_name || "treino").replace(/\s+/g, "_")}_${fmt(treino.created_at)}.png`;
@@ -1320,9 +1340,9 @@ function ExportModal({ treino, onClose }) {
     setGenerating(false);
   }
 
-  const visibleFields = ALL_FIELDS.filter(f => selected.includes(f.key));
+  const visibleFields = ALL_FIELDS.filter(f => selected.includes(f.key) && treino[f.key]);
   const summary = generateSummary(treino, selected);
-  const cols = visibleFields.length <= 2 ? 1 : visibleFields.length <= 4 ? 2 : 2;
+  const cols = visibleFields.length === 1 ? 1 : 2;
 
   return (
     <div className="export-overlay" onClick={onClose}>
