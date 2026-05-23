@@ -14,6 +14,7 @@ export default function Document() {
         <title>IA Coach Treino - VM</title>
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <script src="https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
       </Head>
       <body>
         <Main />
