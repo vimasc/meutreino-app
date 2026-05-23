@@ -336,6 +336,241 @@ const css = `
     padding: 0 14px 14px;
   }
 
+  /* EXPORT */
+  .export-btn {
+    margin: 0 14px 14px;
+    width: calc(100% - 28px);
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(244,107,26,0.3);
+    background: rgba(244,107,26,0.08);
+    color: var(--accent2);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+  .export-btn:hover { background: rgba(244,107,26,0.15); }
+
+  .export-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.88);
+    z-index: 400;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    animation: fadein 0.2s;
+  }
+  .export-modal {
+    width: 100%;
+    max-width: 430px;
+    height: 92vh;
+    background: var(--bg2);
+    border-radius: 20px 20px 0 0;
+    border: 1px solid var(--border2);
+    border-bottom: none;
+    display: flex;
+    flex-direction: column;
+    animation: slideup 0.3s cubic-bezier(0.4,0,0.2,1);
+  }
+  .export-modal-header {
+    padding: 16px 16px 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .export-modal-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text);
+  }
+  .export-modal-title span { color: var(--accent2); }
+
+  .export-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px;
+  }
+
+  .export-section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--text2);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .export-checkboxes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .export-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border2);
+    background: var(--card);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .export-check.checked { border-color: var(--accent); background: rgba(26,179,240,0.08); }
+  .export-check input { display: none; }
+  .export-check-icon { font-size: 16px; }
+  .export-check-label { font-size: 12px; font-weight: 600; color: var(--text2); }
+  .export-check.checked .export-check-label { color: var(--accent); }
+
+  /* CARD DE EXPORTAÇÃO (o que vira imagem) */
+  .export-card {
+    background: #0a1520;
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    border: 1px solid rgba(26,179,240,0.2);
+  }
+  .export-card-header {
+    padding: 14px 16px 10px;
+    background: linear-gradient(135deg, #0d1e2e, #132540);
+    border-bottom: 1px solid rgba(26,179,240,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .export-card-logo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .export-card-logo span { color: #1ab3f0; }
+  .export-card-date {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.5px;
+  }
+  .export-card-name {
+    padding: 10px 16px 4px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 26px;
+    font-weight: 900;
+    color: #f0f2f5;
+    letter-spacing: -0.3px;
+  }
+  .export-map-area {
+    height: 220px;
+    background: #0d1e2e;
+    position: relative;
+    overflow: hidden;
+  }
+  .export-stats-grid {
+    display: grid;
+    gap: 1px;
+    background: rgba(255,255,255,0.06);
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .export-stat-item {
+    padding: 10px 14px;
+    background: #0f1e30;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .export-stat-icon { font-size: 18px; flex-shrink: 0; }
+  .export-stat-info { flex: 1; }
+  .export-stat-val {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: #1ab3f0;
+    line-height: 1;
+  }
+  .export-stat-lbl {
+    font-size: 10px;
+    color: #6b7a8d;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-top: 1px;
+  }
+  .export-summary {
+    padding: 12px 16px;
+    background: #0f1e30;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .export-summary-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #f46b1a;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .export-summary-text {
+    font-size: 12px;
+    line-height: 1.6;
+    color: #9aa5b4;
+  }
+  .export-footer {
+    padding: 8px 16px;
+    background: #080b14;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .export-footer-tag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .export-footer-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #1ab3f0;
+    box-shadow: 0 0 6px #1ab3f0;
+  }
+
+  .export-actions {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+    padding: 0 14px 20px;
+  }
+  .export-download-btn {
+    flex: 1;
+    padding: 13px;
+    border-radius: 12px;
+    background: var(--accent2);
+    border: none;
+    color: #fff;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+  .export-download-btn:hover { transform: scale(1.02); box-shadow: 0 4px 20px rgba(244,107,26,0.3); }
+  .export-download-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
   .confirm-overlay {
     position: fixed;
     inset: 0;
@@ -998,6 +1233,164 @@ function renderMarkdown(text) {
   return elements;
 }
 
+const ALL_FIELDS = [
+  { key: "distance_km", label: "Distância", icon: "📏", unit: "km" },
+  { key: "pace", label: "Pace", icon: "⚡", unit: "min/km" },
+  { key: "heart_rate_avg", label: "FC Média", icon: "❤️", unit: "bpm" },
+  { key: "duration_min", label: "Duração", icon: "⏱️", unit: "min", fmt: v => Math.round(v) },
+  { key: "heart_rate_max", label: "FC Máxima", icon: "💓", unit: "bpm" },
+  { key: "elevation", label: "Altimetria", icon: "⛰️", unit: "m" },
+  { key: "calories", label: "Calorias", icon: "🔥", unit: "kcal" },
+  { key: "cadence", label: "Cadência", icon: "👟", unit: "ppm" },
+];
+
+function generateSummary(treino, fields) {
+  const parts = [];
+  if (fields.includes("distance_km") && treino.distance_km) parts.push(`${treino.distance_km}km`);
+  if (fields.includes("duration_min") && treino.duration_min) parts.push(`${Math.round(treino.duration_min)}min`);
+  if (fields.includes("pace") && treino.pace) parts.push(`pace ${treino.pace}/km`);
+  if (fields.includes("heart_rate_avg") && treino.heart_rate_avg) parts.push(`FC média ${Math.round(treino.heart_rate_avg)}bpm`);
+  if (fields.includes("elevation") && treino.elevation) parts.push(`${treino.elevation}m de ganho altimétrico`);
+  if (fields.includes("calories") && treino.calories) parts.push(`${treino.calories}kcal`);
+
+  const analysis = treino.analysis || "";
+  const firstLine = analysis.split("\n").find(l => l.trim().length > 40) || "";
+  const resumo = firstLine.replace(/[#*_]/g, "").trim().slice(0, 180);
+
+  return parts.length
+    ? `${parts.join(" · ")}${resumo ? ". " + resumo : ""}`
+    : resumo;
+}
+
+function ExportModal({ treino, onClose }) {
+  const [selected, setSelected] = useState(["distance_km", "pace", "heart_rate_avg", "duration_min", "elevation", "calories"]);
+  const [generating, setGenerating] = useState(false);
+  const exportRef = useRef(null);
+  const exportMapRef = useRef(null);
+  const exportMapInstance = useRef(null);
+
+  useEffect(() => {
+    if (!treino.polyline || !exportMapRef.current || typeof window === "undefined" || !window.L) return;
+    const L = window.L;
+    if (exportMapInstance.current) return;
+    setTimeout(() => {
+      if (!exportMapRef.current) return;
+      const coords = decodePolyline(treino.polyline);
+      if (!coords.length) return;
+      const map = L.map(exportMapRef.current, { zoomControl: false, dragging: false, scrollWheelZoom: false, attributionControl: false });
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18 }).addTo(map);
+      const poly = L.polyline(coords, { color: "#1ab3f0", weight: 5, opacity: 1 }).addTo(map);
+      L.circleMarker(coords[0], { radius: 7, fillColor: "#00e676", color: "#fff", weight: 2, fillOpacity: 1 }).addTo(map);
+      L.circleMarker(coords[coords.length - 1], { radius: 7, fillColor: "#f46b1a", color: "#fff", weight: 2, fillOpacity: 1 }).addTo(map);
+      map.fitBounds(poly.getBounds(), { padding: [16, 16] });
+      exportMapInstance.current = map;
+    }, 300);
+  }, [treino.polyline]);
+
+  function toggleField(key) {
+    setSelected(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
+  }
+
+  async function handleDownload() {
+    if (!exportRef.current || typeof window === "undefined" || !window.html2canvas) return;
+    setGenerating(true);
+    try {
+      const canvas = await window.html2canvas(exportRef.current, {
+        backgroundColor: "#0a1520",
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+      });
+      const link = document.createElement("a");
+      link.download = `${(treino.activity_name || "treino").replace(/\s+/g, "_")}_${fmt(treino.created_at)}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    } catch (e) {
+      alert("Erro ao gerar imagem. Tente novamente.");
+    }
+    setGenerating(false);
+  }
+
+  const visibleFields = ALL_FIELDS.filter(f => selected.includes(f.key));
+  const summary = generateSummary(treino, selected);
+  const cols = visibleFields.length <= 2 ? 1 : visibleFields.length <= 4 ? 2 : 2;
+
+  return (
+    <div className="export-overlay" onClick={onClose}>
+      <div className="export-modal" onClick={e => e.stopPropagation()}>
+        <div className="export-modal-header">
+          <div className="export-modal-title">Gerar <span>Imagem</span></div>
+          <button className="close-btn" onClick={onClose}>×</button>
+        </div>
+
+        <div className="export-body">
+          <div className="export-section-title">Selecione os dados</div>
+          <div className="export-checkboxes">
+            {ALL_FIELDS.map(f => (
+              <label key={f.key} className={`export-check ${selected.includes(f.key) ? "checked" : ""}`} onClick={() => toggleField(f.key)}>
+                <input type="checkbox" checked={selected.includes(f.key)} readOnly />
+                <span className="export-check-icon">{f.icon}</span>
+                <span className="export-check-label">{f.label}</span>
+              </label>
+            ))}
+          </div>
+
+          <div className="export-section-title">Preview</div>
+          <div className="export-card" ref={exportRef}>
+            <div className="export-card-header">
+              <div className="export-card-logo">IA Coach<span> Treino</span> · VM</div>
+              <div className="export-card-date">{fmt(treino.created_at)}</div>
+            </div>
+            <div className="export-card-name">{treino.activity_name || "Treino"}</div>
+
+            {treino.polyline && (
+              <div className="export-map-area" ref={exportMapRef} />
+            )}
+
+            {visibleFields.length > 0 && (
+              <div className="export-stats-grid" style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}>
+                {visibleFields.map(f => {
+                  const raw = treino[f.key];
+                  const val = f.fmt ? f.fmt(raw) : raw;
+                  if (!val) return null;
+                  return (
+                    <div key={f.key} className="export-stat-item">
+                      <span className="export-stat-icon">{f.icon}</span>
+                      <div className="export-stat-info">
+                        <div className="export-stat-val">{val} <span style={{fontSize:11,color:"#6b7a8d"}}>{f.unit}</span></div>
+                        <div className="export-stat-lbl">{f.label}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {summary && (
+              <div className="export-summary">
+                <div className="export-summary-title">⚡ Resumo do Coach</div>
+                <div className="export-summary-text">{summary}</div>
+              </div>
+            )}
+
+            <div className="export-footer">
+              <span className="export-footer-tag">iacoachtreino.app</span>
+              <div className="export-footer-dot" />
+            </div>
+          </div>
+        </div>
+
+        <div className="export-actions">
+          <button className="export-download-btn" onClick={handleDownload} disabled={generating}>
+            {generating ? "Gerando..." : "📥 Baixar PNG"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function decodePolyline(encoded) {
   const coords = [];
   let index = 0, lat = 0, lng = 0;
@@ -1092,6 +1485,7 @@ function TreinoCard({ treino, defaultOpen, onDelete }) {
   const [showFull, setShowFull] = useState(false);
   const [confirm, setConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const analise = treino.analysis || "";
   const analiseShort = analise.slice(0, 500);
   const hasMore = analise.length > 500;
@@ -1157,6 +1551,10 @@ function TreinoCard({ treino, defaultOpen, onDelete }) {
 
         <ChatBlock treino={treino} />
         <MapBlock treino={treino} />
+
+        <button className="export-btn" onClick={() => setExporting(true)}>
+          📸 Gerar Imagem do Treino
+        </button>
       </div>
     </div>
 
@@ -1177,6 +1575,7 @@ function TreinoCard({ treino, defaultOpen, onDelete }) {
           </div>
         </div>
       )}
+      {exporting && <ExportModal treino={treino} onClose={() => setExporting(false)} />}
     </>
   );
 }
