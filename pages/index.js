@@ -409,6 +409,28 @@ const css = `
     margin-bottom: 10px;
   }
 
+  .format-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .format-btn {
+    flex: 1;
+    padding: 8px 6px;
+    border-radius: 8px;
+    border: 1px solid var(--border2);
+    background: var(--card);
+    color: var(--text2);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+    letter-spacing: 0.5px;
+  }
+  .format-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(26,179,240,0.08); }
+
   .export-checkboxes {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1268,8 +1290,15 @@ function generateSummary(treino, fields) {
     : resumo;
 }
 
+const FORMATS = [
+  { id: "story", label: "📱 Story", w: 1080, h: 1920 },
+  { id: "square", label: "⬛ Post", w: 1080, h: 1080 },
+  { id: "landscape", label: "🖼️ Paisagem", w: 1920, h: 1080 },
+];
+
 function ExportModal({ treino, onClose }) {
   const [selected, setSelected] = useState(["distance_km", "pace", "heart_rate_avg", "duration_min", "elevation", "calories"]);
+  const [format, setFormat] = useState("square");
   const [generating, setGenerating] = useState(false);
   const exportRef = useRef(null);
   const exportMapRef = useRef(null);
@@ -1311,86 +1340,118 @@ function ExportModal({ treino, onClose }) {
   async function handleDownload() {
     setGenerating(true);
     try {
-      const W = 720;
+      const fmt_sel = FORMATS.find(f => f.id === format);
+      const W = fmt_sel.w;
+      const H = fmt_sel.h;
+      const isLandscape = format === "landscape";
+      const isStory = format === "story";
+
       const fields = ALL_FIELDS.filter(f => selected.includes(f.key) && treino[f.key]);
       const summary = generateSummary(treino, selected);
-      const summaryLines = summary ? wrapText(summary, 62) : [];
 
-      // Calculate total height
-      const HEADER_H = 56;
-      const NAME_H = 52;
-      const MAP_H = treino.polyline ? 280 : 0;
-      const STATS_H = fields.length > 0 ? Math.ceil(fields.length / 2) * 64 : 0;
-      const SUMMARY_H = summaryLines.length > 0 ? 30 + summaryLines.length * 22 + 24 : 0;
-      const FOOTER_H = 40;
-      const TOTAL_H = HEADER_H + NAME_H + MAP_H + STATS_H + SUMMARY_H + FOOTER_H;
+      // Scale fonts 20% bigger
+      const F = 1.2;
+
+      // Layout heights
+      const HEADER_H = Math.round(70 * F);
+      const NAME_H = Math.round(70 * F);
+      const STAT_ROW_H = Math.round(80 * F);
+      const FOOTER_H = Math.round(50 * F);
+
+      // For landscape: side by side layout
+      // For story/square: stacked
+      let MAP_H, STATS_COLS, CANVAS_H;
+
+      if (isLandscape) {
+        MAP_H = H - HEADER_H - NAME_H - FOOTER_H;
+        STATS_COLS = 1;
+        CANVAS_H = H;
+      } else if (isStory) {
+        MAP_H = Math.round(H * 0.45);
+        STATS_COLS = 2;
+        const statsRows = Math.ceil(fields.length / 2);
+        const summaryLines = summary ? wrapText(summary, isStory ? 45 : 55) : [];
+        const SUMMARY_H = summaryLines.length > 0 ? Math.round((40 + summaryLines.length * 28 + 20) * F) : 0;
+        CANVAS_H = HEADER_H + NAME_H + MAP_H + statsRows * STAT_ROW_H + SUMMARY_H + FOOTER_H;
+      } else {
+        MAP_H = Math.round(W * 0.5);
+        STATS_COLS = 2;
+        const statsRows = Math.ceil(fields.length / 2);
+        const summaryLines = summary ? wrapText(summary, 55) : [];
+        const SUMMARY_H = summaryLines.length > 0 ? Math.round((40 + summaryLines.length * 28 + 20) * F) : 0;
+        CANVAS_H = HEADER_H + NAME_H + MAP_H + statsRows * STAT_ROW_H + SUMMARY_H + FOOTER_H;
+      }
 
       const canvas = document.createElement("canvas");
-      canvas.width = W * 2;
-      canvas.height = TOTAL_H * 2;
+      canvas.width = W;
+      canvas.height = isLandscape ? H : CANVAS_H;
       const ctx = canvas.getContext("2d");
-      ctx.scale(2, 2);
 
       // Background
       ctx.fillStyle = "#0a1520";
-      ctx.fillRect(0, 0, W, TOTAL_H);
+      ctx.fillRect(0, 0, W, canvas.height);
 
-      // Header
+      // Header gradient
       const grad = ctx.createLinearGradient(0, 0, W, HEADER_H);
       grad.addColorStop(0, "#0d1e2e");
       grad.addColorStop(1, "#132540");
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, W, HEADER_H);
 
-      ctx.fillStyle = "rgba(255,255,255,0.45)";
-      ctx.font = "bold 13px Arial";
-      ctx.fillText("IA COACH", 20, 28);
+      // Logo
+      ctx.fillStyle = "rgba(255,255,255,0.5)";
+      ctx.font = `bold ${Math.round(16*F)}px Arial`;
+      ctx.fillText("IA COACH", 24, Math.round(36*F));
       ctx.fillStyle = "#1ab3f0";
-      ctx.fillText(" TREINO", 20 + ctx.measureText("IA COACH").width, 28);
-      ctx.fillStyle = "rgba(255,255,255,0.45)";
-      ctx.fillText(" · VM", 20 + ctx.measureText("IA COACH TREINO").width, 28);
+      ctx.fillText(" TREINO", 24 + ctx.measureText("IA COACH").width, Math.round(36*F));
+      ctx.fillStyle = "rgba(255,255,255,0.5)";
+      ctx.fillText(" · VM", 24 + ctx.measureText("IA COACH TREINO").width, Math.round(36*F));
 
+      // Date
       ctx.fillStyle = "rgba(255,255,255,0.35)";
-      ctx.font = "12px Arial";
-      ctx.fillText(fmt(treino.created_at), W - 60, 28);
+      ctx.font = `${Math.round(14*F)}px Arial`;
+      ctx.fillText(fmt(treino.created_at), W - Math.round(80*F), Math.round(36*F));
 
-      // Activity type badge
+      // Activity type
       ctx.fillStyle = "#f46b1a";
-      ctx.font = "bold 11px Arial";
-      ctx.fillText((treino.activity_type || "RUN").toUpperCase(), 20, 48);
+      ctx.font = `bold ${Math.round(13*F)}px Arial`;
+      ctx.fillText((treino.activity_type || "RUN").toUpperCase(), 24, Math.round(58*F));
 
       // Activity name
       ctx.fillStyle = "#f0f2f5";
-      ctx.font = "bold 32px Arial";
-      ctx.fillText(treino.activity_name || "Treino", 20, HEADER_H + 36);
+      ctx.font = `bold ${Math.round(42*F)}px Arial`;
+      const nameMaxW = W - 48;
+      let nameText = treino.activity_name || "Treino";
+      while (ctx.measureText(nameText).width > nameMaxW && nameText.length > 5) {
+        nameText = nameText.slice(0, -1);
+      }
+      if (nameText !== treino.activity_name) nameText += "…";
+      ctx.fillText(nameText, 24, HEADER_H + Math.round(46*F));
 
       let y = HEADER_H + NAME_H;
 
-      // Map - draw route directly on canvas (works on mobile)
+      // MAP
       if (treino.polyline) {
-        // Draw dark background
         ctx.fillStyle = "#0d1e2e";
-        ctx.fillRect(0, y, W, MAP_H);
+        ctx.fillRect(0, y, isLandscape ? W * 0.55 : W, MAP_H);
 
-        // Decode and draw route
         const coords = decodePolyline(treino.polyline);
         if (coords.length > 1) {
-          // Find bounds
+          const mapW = isLandscape ? W * 0.55 : W;
           const lats = coords.map(c => c[0]);
           const lngs = coords.map(c => c[1]);
           const minLat = Math.min(...lats), maxLat = Math.max(...lats);
           const minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
-          const pad = 20;
+          const pad = 40;
 
-          const toX = lng => pad + ((lng - minLng) / (maxLng - minLng || 1)) * (W - pad * 2);
+          const toX = lng => pad + ((lng - minLng) / (maxLng - minLng || 1)) * (mapW - pad * 2);
           const toY = lat => y + pad + ((maxLat - lat) / (maxLat - minLat || 1)) * (MAP_H - pad * 2);
 
-          // Draw route with glow
           ctx.shadowColor = "#1ab3f0";
-          ctx.shadowBlur = 6;
+          ctx.shadowBlur = 10;
           ctx.beginPath();
           ctx.strokeStyle = "#1ab3f0";
-          ctx.lineWidth = 3;
+          ctx.lineWidth = Math.round(4 * F);
           ctx.lineJoin = "round";
           ctx.lineCap = "round";
           ctx.moveTo(toX(coords[0][1]), toY(coords[0][0]));
@@ -1398,106 +1459,107 @@ function ExportModal({ treino, onClose }) {
           ctx.stroke();
           ctx.shadowBlur = 0;
 
-          const lastCoord = coords[coords.length - 1];
-
-          // Start marker
+          const r = Math.round(10 * F);
           ctx.beginPath();
           ctx.fillStyle = "#00e676";
-          ctx.arc(toX(coords[0][1]), toY(coords[0][0]), 8, 0, Math.PI * 2);
+          ctx.arc(toX(coords[0][1]), toY(coords[0][0]), r, 0, Math.PI * 2);
           ctx.fill();
-          ctx.strokeStyle = "#fff";
-          ctx.lineWidth = 2;
-          ctx.stroke();
+          ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.stroke();
 
-          // End marker
+          const last = coords[coords.length - 1];
           ctx.beginPath();
           ctx.fillStyle = "#f46b1a";
-          ctx.arc(toX(lastCoord[1]), toY(lastCoord[0]), 8, 0, Math.PI * 2);
+          ctx.arc(toX(last[1]), toY(last[0]), r, 0, Math.PI * 2);
           ctx.fill();
-          ctx.strokeStyle = "#fff";
-          ctx.lineWidth = 2;
-          ctx.stroke();
+          ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.stroke();
         }
-        y += MAP_H;
+
+        if (!isLandscape) y += MAP_H;
       }
 
-      // Separator
-      ctx.fillStyle = "rgba(255,255,255,0.06)";
-      ctx.fillRect(0, y, W, 1);
+      // STATS
+      const statsX = isLandscape && treino.polyline ? W * 0.57 : 0;
+      const statsW = isLandscape && treino.polyline ? W * 0.43 : W;
+      const statsY = isLandscape ? HEADER_H + NAME_H : y;
+      const cols = isLandscape ? 1 : STATS_COLS;
+      const colW = statsW / cols;
 
-      // Stats
-      if (fields.length > 0) {
-        const cols = 2;
-        const colW = W / cols;
-        fields.forEach((f, idx) => {
-          const col = idx % cols;
-          const row = Math.floor(idx / cols);
-          const sx = col * colW;
-          const sy = y + row * 64;
+      fields.forEach((f, idx) => {
+        const col = isLandscape ? 0 : idx % cols;
+        const row = isLandscape ? idx : Math.floor(idx / cols);
+        const sx = statsX + col * colW;
+        const sy = statsY + row * STAT_ROW_H;
 
-          ctx.fillStyle = "#0f1e30";
-          ctx.fillRect(sx, sy, colW - 1, 63);
+        ctx.fillStyle = idx % 2 === 0 ? "#0f1e30" : "#111d2e";
+        ctx.fillRect(sx, sy, colW - 1, STAT_ROW_H - 1);
 
-          // Icon
-          ctx.font = "20px Arial";
-          ctx.fillText(f.icon, sx + 12, sy + 36);
+        // Icon
+        ctx.font = `${Math.round(24*F)}px Arial`;
+        ctx.fillText(f.icon, sx + 16, sy + Math.round(46*F));
 
-          // Value
-          const raw = treino[f.key];
-          const val = f.fmt ? f.fmt(raw) : raw;
-          const valStr = String(val);
-          ctx.fillStyle = "#1ab3f0";
-          ctx.font = "bold 22px Arial";
-          ctx.fillText(valStr, sx + 44, sy + 30);
+        // Value
+        const raw = treino[f.key];
+        const val = f.fmt ? f.fmt(raw) : raw;
+        const valStr = String(val);
+        ctx.fillStyle = "#1ab3f0";
+        ctx.font = `bold ${Math.round(28*F)}px Arial`;
+        ctx.fillText(valStr, sx + Math.round(58*F), sy + Math.round(42*F));
 
-          // Unit - positioned after value with proper spacing
-          if (f.unit) {
-            ctx.fillStyle = "#6b7a8d";
-            ctx.font = "11px Arial";
-            const valWidth = ctx.measureText(valStr).width;
-            // measure with bold font first
-            ctx.font = "bold 22px Arial";
-            const boldWidth = ctx.measureText(valStr).width;
-            ctx.font = "11px Arial";
-            ctx.fillText(f.unit, sx + 44 + boldWidth + 4, sy + 30);
-          }
-
-          // Label
+        // Unit
+        if (f.unit) {
+          ctx.font = `bold ${Math.round(28*F)}px Arial`;
+          const vw = ctx.measureText(valStr).width;
           ctx.fillStyle = "#6b7a8d";
-          ctx.font = "10px Arial";
-          ctx.fillText(f.label.toUpperCase(), sx + 44, sy + 48);
-        });
-        y += Math.ceil(fields.length / 2) * 64;
-      }
+          ctx.font = `${Math.round(13*F)}px Arial`;
+          ctx.fillText(f.unit, sx + Math.round(58*F) + vw + 5, sy + Math.round(42*F));
+        }
 
-      // Summary
+        // Label
+        ctx.fillStyle = "#6b7a8d";
+        ctx.font = `${Math.round(11*F)}px Arial`;
+        ctx.fillText(f.label.toUpperCase(), sx + Math.round(58*F), sy + Math.round(62*F));
+      });
+
+      if (!isLandscape) y += Math.ceil(fields.length / 2) * STAT_ROW_H;
+
+      // SUMMARY
+      const summaryLines = summary ? wrapText(summary, isStory ? 45 : isLandscape ? 38 : 55) : [];
       if (summaryLines.length > 0) {
-        ctx.fillStyle = "#0f1e30";
-        ctx.fillRect(0, y, W, SUMMARY_H);
+        const sumY = isLandscape ? statsY + fields.length * STAT_ROW_H : y;
+        const sumW = isLandscape ? statsW : W;
+        const sumX = isLandscape ? statsX : 0;
+        const SUMMARY_H = Math.round((40 + summaryLines.length * 28 + 20) * F);
+
+        ctx.fillStyle = "#0c1828";
+        ctx.fillRect(sumX, sumY, sumW, SUMMARY_H);
+
         ctx.fillStyle = "#f46b1a";
-        ctx.font = "bold 11px Arial";
-        ctx.fillText("⚡ RESUMO DO COACH", 16, y + 20);
+        ctx.font = `bold ${Math.round(13*F)}px Arial`;
+        ctx.fillText("⚡ RESUMO DO COACH", sumX + 20, sumY + Math.round(26*F));
+
         ctx.fillStyle = "#9aa5b4";
-        ctx.font = "13px Arial";
+        ctx.font = `${Math.round(15*F)}px Arial`;
         summaryLines.forEach((line, i) => {
-          ctx.fillText(line, 16, y + 38 + i * 22);
+          ctx.fillText(line, sumX + 20, sumY + Math.round((44 + i * 28) * F));
         });
-        y += SUMMARY_H;
+
+        if (!isLandscape) y += SUMMARY_H;
       }
 
-      // Footer
+      // FOOTER
+      const footY = isLandscape ? H - FOOTER_H : y;
       ctx.fillStyle = "#080b14";
-      ctx.fillRect(0, y, W, FOOTER_H);
+      ctx.fillRect(0, footY, W, FOOTER_H);
       ctx.fillStyle = "rgba(255,255,255,0.2)";
-      ctx.font = "11px Arial";
-      ctx.fillText("IACOACHTREINO.APP", 16, y + 24);
+      ctx.font = `${Math.round(13*F)}px Arial`;
+      ctx.fillText("IACOACHTREINO.APP", 20, footY + Math.round(30*F));
       ctx.fillStyle = "#1ab3f0";
       ctx.beginPath();
-      ctx.arc(W - 20, y + 20, 5, 0, Math.PI * 2);
+      ctx.arc(W - 24, footY + Math.round(22*F), 6, 0, Math.PI * 2);
       ctx.fill();
 
       const link = document.createElement("a");
-      link.download = `${(treino.activity_name || "treino").replace(/\s+/g, "_")}_${fmt(treino.created_at)}.jpg`;
+      link.download = `${(treino.activity_name || "treino").replace(/\s+/g, "_")}_${format}_${fmt(treino.created_at)}.jpg`;
       link.href = canvas.toDataURL("image/jpeg", 0.92);
       link.click();
     } catch (e) {
@@ -1506,7 +1568,6 @@ function ExportModal({ treino, onClose }) {
     }
     setGenerating(false);
   }
-
   function wrapText(text, maxChars) {
     const words = text.split(" ");
     const lines = [];
@@ -1520,7 +1581,7 @@ function ExportModal({ treino, onClose }) {
       }
     });
     if (line) lines.push(line);
-    return lines.slice(0, 5);
+    return lines.slice(0, 6);
   }
 
   const visibleFields = ALL_FIELDS.filter(f => selected.includes(f.key) && treino[f.key]);
@@ -1536,6 +1597,15 @@ function ExportModal({ treino, onClose }) {
         </div>
 
         <div className="export-body">
+          <div className="export-section-title">Formato</div>
+          <div className="format-selector">
+            {FORMATS.map(f => (
+              <button key={f.id} className={`format-btn ${format === f.id ? "active" : ""}`} onClick={() => setFormat(f.id)}>
+                {f.label}
+              </button>
+            ))}
+          </div>
+
           <div className="export-section-title">Selecione os dados</div>
           <div className="export-checkboxes">
             {ALL_FIELDS.map(f => (
